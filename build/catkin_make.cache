@@ -1,0 +1,2 @@
+robot_control:ros_processing_bridge
+-DCATKIN_DEVEL_PREFIX=/home/Code/point_robot_2d_processing/devel -DCMAKE_INSTALL_PREFIX=/home/Code/point_robot_2d_processing/install -G Unix Makefiles

@@ -1,0 +1,8 @@
+prefix=/home/Code/point_robot_2d_processing/install
+
+Name: robot_control
+Description: Description of robot_control
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/Code/point_robot_2d_processing/install/lib 
+Requires: geometry_msgs rospy sensor_msgs std_msgs ros_processing_bridge

@@ -1,0 +1,8 @@
+prefix=/home/Code/point_robot_2d_processing/devel
+
+Name: ros_processing_bridge
+Description: Description of ros_processing_bridge
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/Code/point_robot_2d_processing/devel/lib 
+Requires: rospy

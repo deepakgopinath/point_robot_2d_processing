@@ -11,11 +11,12 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   rospy
   sensor_msgs
+  ros_processing_bridge
   std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -106,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES robot_control
-#  CATKIN_DEPENDS geometry_msgs rospy sensor_msgs std_msgs
+ CATKIN_DEPENDS geometry_msgs rospy sensor_msgs std_msgs ros_processing_bridge
 #  DEPENDS system_lib
 )
 
@@ -119,6 +120,7 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library

@@ -1,0 +1,6 @@
+set(ros_processing_bridge_SETUP_PY_VERSION "0.0.0")
+set(ros_processing_bridge_SETUP_PY_SCRIPTS "")
+set(ros_processing_bridge_SETUP_PY_PACKAGES "ros_processing_bridge")
+set(ros_processing_bridge_SETUP_PY_PACKAGE_DIRS "src/ros_processing_bridge")
+set(ros_processing_bridge_SETUP_PY_MODULES "")
+set(ros_processing_bridge_SETUP_PY_MODULE_DIRS "")
