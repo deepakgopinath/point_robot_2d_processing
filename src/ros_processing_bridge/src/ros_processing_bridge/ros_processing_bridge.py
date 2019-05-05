@@ -11,6 +11,7 @@ class RosProcessingComm(object):
 		self.rate = 40.0
 		self.udp_ip = udp_ip
 		self.udp_send_port = udp_send_port
+		self.udp_recv_port = udp_recv_port
 		
 		self.sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.sock_send.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -27,7 +28,7 @@ class RosProcessingComm(object):
 		self.sock_send.sendto(msg_str.encode('utf-8'), (self.udp_ip, self.udp_send_port))
 
 
-	def recvStrFromProcessing(self, msg_str):
+	def recvStrFromProcessing(self):
 		msg_string = "none"
 		try:
 			msg = self.sock_recv.recv(4096)
@@ -39,7 +40,7 @@ class RosProcessingComm(object):
 				print (e)
 				sys.exit(1)
 		else:
-			msg_string = msg.decode()
-			rospy.logfatal("Received message from PROCESSING APP")
+			msg_string = msg
+			# rospy.logfatal("Received message from PROCESSING APP")
 
 		return msg_string

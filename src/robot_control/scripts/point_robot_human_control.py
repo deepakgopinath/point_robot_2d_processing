@@ -8,19 +8,22 @@ from std_msgs.msg import MultiArrayDimension
 from std_msgs.msg import Header
 from std_msgs.msg import String
 
-from point_robot_human_control.msg import CartVelCmd
+from robot_control.msg import CartVelCmd
 
 import rospy
 import math
 import random
 import numpy as np
+import threading
 
 class PointRobotHumanControl(RosProcessingComm):
-	def __init__(self):
-		print "In constructor"
+	def __init__(self, dim=2, udp_ip='127.0.0.1', udp_recv_port=8025, udp_send_port=6001):
+		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)
+		self.period = rospy.Duration(1.0/60.0)
+		self.lock = threading.Lock()
 		rospy.Subscriber('joy', Joy, self.joyCB)
-		rospy.Publisher('user_vel', Float32MultiArray, queue_size=1)
-		self.dim = 2
+		self.human_control_pub = rospy.Publisher('user_vel', CartVelCmd, queue_size=1)
+		self.dim = dim
 		if rospy.has_param('max_cart_vel'):
 			self._max_cart_vel = np.array(rospy.get_param('max_cart_vel'))
 		else:
@@ -28,22 +31,78 @@ class PointRobotHumanControl(RosProcessingComm):
 			rospy.logwarn('No rosparam for max_cart_vel found...Defaulting to max linear velocity of 50 cm/s and max rotational velocity of 50 degrees/s')
 
 
-		self._cart_vel = np.zeros(self.dim)
 		self.user_vel = CartVelCmd()
 		_dim = [MultiArrayDimension()]
 		_dim[0].label = 'cartesian_velocity'
 		_dim[0].size = 2
 		_dim[0].stride = 2
 		self.user_vel.velocity.layout.dim = _dim
-		self.user_vel.velocity.data = np.zeros_like(self._cart_vel)
+		self.user_vel.velocity.data = np.zeros(self.dim)
 		self.user_vel.header.stamp = rospy.Time.now()
-		self.user_vel.header.frame_id = 'joy1axis'
+		self.user_vel.header.frame_id = 'human_control'
+
+		self.data = CartVelCmd()
+		self._msg_dim = [MultiArrayDimension()]
+		self._msg_dim[0].label = 'cartesian_velocity'
+		self._msg_dim[0].size = 2
+		self._msg_dim[0].stride = 2
+		self.data.velocity.layout.dim = _dim
+		self.data.velocity.data = np.zeros(self.dim)
+		self.data.header.stamp = rospy.Time.now()
+		self.data.header.frame_id = 'human_control'
+
+		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
+		self.send_thread.start()
+		# while not rospy.is_shutdown():
+		# 	print " "
+
+	def _publish_command(self, period):
+		while not rospy.is_shutdown():
+			start = rospy.get_rostime()
+			self.lock.acquire()
+			try:
+				data = CartVelCmd()
+				data.velocity.data = self.user_vel.velocity.data
+				data.velocity.layout.dim = self._msg_dim
+				data.header.stamp = rospy.Time.now()
+				data.header.frame_id = 'human_control'
+			finally:
+				self.lock.release()
+
+			self.human_control_pub.publish(data)
+			msg_str = self.createMessageString(self.user_vel)
+			self.sendStrToProcessing(msg_str)
+
+
+			end = rospy.get_rostime()
+
+			if end - start < period:
+				rospy.sleep(period - (end-start))
+			else:
+				rospy.logwarn("Sending data took longer than the specified period")
+
+
+
+	def createMessageString(self, uv):
+		msg_str = "HUMAN_COMMAND"
+		for i in range(self.dim):
+			msg_str += ","
+			msg_str += str(uv.velocity.data[i])
+
+		return msg_str
+
 	
 	def joyCB(self, msg):
-		_axes = np(msg.axes)
-		self.user_vel.velocity.data[0] = _axes[0] * self._max_cart_vel[0]
-		self.user_vel.velocity.data[1] = _axes[1] * self._max_cart_vel[1]
+		_axes = np.array(msg.axes)
+		for i in range(self.dim):
+			self.user_vel.velocity.data[i] = 0.0
+
+		self.user_vel.velocity.data[0] = -_axes[0] * self._max_cart_vel[0]# + random.random()
+		self.user_vel.velocity.data[1] = -_axes[1] * self._max_cart_vel[1]
 		self.user_vel.header.stamp = rospy.Time.now()
+
+	
+
 
 if __name__ == '__main__':
 	rospy.init_node('point_robot_human_control')

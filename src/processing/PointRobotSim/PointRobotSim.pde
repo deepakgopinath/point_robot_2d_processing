@@ -45,15 +45,15 @@ ArrayList <Goal> human_goalList;
 //Bools 
 
 boolean isGoalInitialized = false;
+boolean allInitialized = false;
 
 //General
-PVector rob_vel;
+PVector rob_vel = new PVector(0.0, 0.0);
 
 void setup()
 {
-  size(1200, 900);
-
-
+  size(400, 300);
+  frameRate(60);
   AUTONOMY_ROBOT_LB = 0;
   AUTONOMY_ROBOT_RB = width/2;
 
@@ -61,13 +61,6 @@ void setup()
   HUMAN_ROBOT_RB = width;
 
   smooth();
-
-
-  autonomy_udp = new UDP(this, AUTONOMY_HOST_PORT);
-  autonomy_udp.listen(true);
-  human_udp = new UDP(this, HUMAN_HOST_PORT);
-  human_udp.listen(true);
-
   now = millis();
 
   autonomy_robot = new Robot((AUTONOMY_ROBOT_LB + AUTONOMY_ROBOT_RB)/2.0, height/2.0, ROBOT_RADIUS, AUTONOMY_ROBOT_LB, AUTONOMY_ROBOT_RB);
@@ -81,6 +74,14 @@ void setup()
 
   robot_goalList = new ArrayList<Goal>();
   human_goalList = new ArrayList<Goal>();
+  
+  delay(1000);
+  autonomy_udp = new UDP(this, AUTONOMY_HOST_PORT);
+  autonomy_udp.listen(true);
+  human_udp = new UDP(this, HUMAN_HOST_PORT);
+  human_udp.listen(true);
+  
+  allInitialized = true;
 }
 
 
@@ -99,9 +100,9 @@ void draw()
     String autonomy_rob_pos_message = "AutonomyRobotPosition," + str(autonomy_rob_pos.x) + "," + str(autonomy_rob_pos.y);
     sendUDP(autonomy_rob_pos_message, AUTONOMY_DEST_IP, AUTONOMY_DEST_PORT, autonomy_udp);
 
-    human_rob_pos = human_robot.getPosition();
-    String human_rob_pos_message = "humanRobotPosition," + str(human_rob_pos.x) + "," + str(human_rob_pos.y);
-    sendUDP(human_rob_pos_message, HUMAN_DEST_IP, HUMAN_DEST_PORT, human_udp);
+    //human_rob_pos = human_robot.getPosition();
+    //String human_rob_pos_message = "humanRobotPosition," + str(human_rob_pos.x) + "," + str(human_rob_pos.y);
+    //sendUDP(human_rob_pos_message, HUMAN_DEST_IP, HUMAN_DEST_PORT, human_udp);
     now = millis();
   }
 }
@@ -112,6 +113,4 @@ void mouseDragged()
   PVector currentMousePoint = new PVector(mouseX, mouseY, 0);
   PVector prevMousePoint = new PVector(pmouseX, pmouseY, 0);
   rob_vel = PVector.sub(currentMousePoint, prevMousePoint);
-  autonomy_robot.updatePosition(rob_vel);
-  human_robot.updatePosition(rob_vel);
 }
