@@ -25,8 +25,8 @@ String autonomy_rob_color = "w";
 String human_rob_color = "gray";
 
 
-PVector autonomy_rob_vel;
-PVector human_rob_vel;
+PVector autonomy_rob_vel = new PVector(0.0, 0.0);
+PVector human_rob_vel = new PVector(0.0, 0.0);
 
 
 //UDP Variables;
@@ -51,11 +51,10 @@ boolean isGoalInitialized = false;
 boolean allInitialized = false;
 
 //General
-PVector rob_vel = new PVector(0.0, 0.0);
 
 void setup()
 {
-  size(400, 300);
+  size(800, 600);
   frameRate(60);
   AUTONOMY_ROBOT_LB = 0;
   AUTONOMY_ROBOT_RB = width/2;
@@ -97,13 +96,13 @@ void draw()
   displayGoals();
   autonomy_robot.display();
   human_robot.display();
-  
+
   if (millis () > now + 100);
   {
+
     autonomy_rob_pos = autonomy_robot.getPosition();
     String autonomy_rob_pos_message = "AutonomyRobotPosition," + str(autonomy_rob_pos.x) + "," + str(autonomy_rob_pos.y);
     sendUDP(autonomy_rob_pos_message, AUTONOMY_DEST_IP, AUTONOMY_DEST_PORT, autonomy_udp);
-
     //human_rob_pos = human_robot.getPosition();
     //String human_rob_pos_message = "humanRobotPosition," + str(human_rob_pos.x) + "," + str(human_rob_pos.y);
     //sendUDP(human_rob_pos_message, HUMAN_DEST_IP, HUMAN_DEST_PORT, human_udp);
@@ -112,9 +111,9 @@ void draw()
 }
 
 
-void mouseDragged()
-{
-  PVector currentMousePoint = new PVector(mouseX, mouseY, 0);
-  PVector prevMousePoint = new PVector(pmouseX, pmouseY, 0);
-  rob_vel = PVector.sub(currentMousePoint, prevMousePoint);
-}
+//void mouseDragged()
+//{
+//  PVector currentMousePoint = new PVector(mouseX, mouseY, 0);
+//  PVector prevMousePoint = new PVector(pmouseX, pmouseY, 0);
+//  //rob_vel = PVector.sub(currentMousePoint, prevMousePoint);
+//}

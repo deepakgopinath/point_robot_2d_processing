@@ -15,20 +15,20 @@ void processMessage(String message, String ip, int port)
   String[] message_list = split(message, ",");
   if (message_list[0].equals("HUMAN_COMMAND"))
   {
-    rob_vel.x = float(message_list[1]);
-    rob_vel.y = float(message_list[2]);
+    human_rob_vel.x = float(message_list[1]);
+    human_rob_vel.y = float(message_list[2]);
     if (allInitialized)
     {
-      human_robot.updatePosition(rob_vel);
+      human_robot.updatePosition(human_rob_vel);
     }
   }
   if (message_list[0].equals("AUTONOMY_COMMAND"))
   {
-    rob_vel.x = float(message_list[1]);
-    rob_vel.y = float(message_list[2]);
+    autonomy_rob_vel.x = float(message_list[1]);
+    autonomy_rob_vel.y = float(message_list[2]);
     if (allInitialized)
     {
-      autonomy_robot.updatePosition(rob_vel);
+      autonomy_robot.updatePosition(autonomy_rob_vel);
     }
   }
   if (message_list[0].equals("GOALPOS"))
@@ -37,6 +37,5 @@ void processMessage(String message, String ip, int port)
     assert(message_list.length - 2 == (2*num_goals));
     init_goals(message_list);
     isGoalInitialized = true;
-    
   }
 }

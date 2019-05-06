@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   message_generation
+  dynamic_reconfigure
   ros_processing_bridge
   std_msgs
 )
@@ -89,10 +90,9 @@ generate_messages(
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+generate_dynamic_reconfigure_options(
+  cfg/transparency_params.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -106,7 +106,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES robot_control
- CATKIN_DEPENDS geometry_msgs rospy sensor_msgs std_msgs ros_processing_bridge
+ CATKIN_DEPENDS dynamic_reconfigure geometry_msgs rospy sensor_msgs std_msgs ros_processing_bridge
 #  DEPENDS system_lib
 )
 

@@ -18,8 +18,16 @@ class SetGoals(RosProcessingComm):
 		
 		rospy.Service("setgoals/goal_poses_list", GoalPoses, self.goal_poses_list)
 
-		self.width = 400 
-		self.height = 300
+		if rospy.has_param('width'):
+			self.width = rospy.get_param('width')
+		else:
+			self.width = 1200
+
+		if rospy.has_param('height'):
+			self.height = rospy.get_param('height')
+		else:
+			self.height = 900 
+			
 		self.init_goal_positions()
 		msg_string = self.createMsgString()
 		self.sendStrToProcessing(msg_string)

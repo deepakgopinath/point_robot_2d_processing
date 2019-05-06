@@ -11,7 +11,8 @@ from robot_control.srv import GoalPoses, GoalPosesResponse, GoalPosesRequest
 
 from geometry_msgs.msg import Point
 from robot_control.msg import CartVelCmd
-
+from dynamic_reconfigure.server import Server as DynamicReconfigureServer
+from robot_control.cfg import transparency_paramsConfig as ConfigType
 import rospy
 import math
 import random
@@ -24,7 +25,20 @@ class PointRobotAutonomyControl(RosProcessingComm):
 	def __init__(self, intended_goal_index = 0, dim=2, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port = 6000):
 		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)		
 		print "In constructor"
-		self.period = rospy.Duration(1.0/60.0)
+
+		if rospy.has_param('framerate'):
+			self.frame_rate = rospy.get_param('framerate')
+		else:
+			self.frame_rate = 60.0
+
+		# self.frame_rate = 60.0
+
+		self.server = DynamicReconfigureServer(ConfigType, self.reconfigureParams)
+		self.signal_sparsity = 0.0
+		self.random_direction = 0.0
+
+
+		self.period = rospy.Duration(1.0/self.frame_rate)
 		self.lock = threading.Lock()
 		self.rate =rospy.Rate(60)
 		self.dim = dim
@@ -53,8 +67,9 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.autonomy_vel.header.frame_id = 'autonomy_control'
 
 		self.autonomy_robot_pose = np.zeros(self.dim)
-		self.getRobotPosition()
 		self.autonomy_robot_pose_msg = Point()
+		self.getRobotPosition()
+		
 
 		self.data = CartVelCmd()
 		self._msg_dim = [MultiArrayDimension()]
@@ -92,6 +107,13 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.send_thread.start()
 
 		
+	def reconfigureParams(self, config):
+		print "IN CONFIG"
+		self.signal_sparsity = config["signal_sparsity"]
+		self.random_direction = config["random_direction"]
+		print self.signal_sparsity, self.random_direction
+		return config
+
 
 	def initializePublishers(self):
 		self.autonomy_control_pub = rospy.Publisher('autonomy_vel', CartVelCmd, queue_size=1)
@@ -146,7 +168,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		for i in range(self.dim):
 			self.autonomy_vel.velocity.data[i] = 0.0
 		for i in range(self.dim):
-			self.autonomy_vel.velocity.data[i] = 0.05*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
+			self.autonomy_vel.velocity.data[i] = 0.4*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
 
 	
 		# #DUse the current robot position. Use the goal positions. Compute the velocity and populate the self.autonomy_vel

@@ -22,7 +22,12 @@ npa = np.array
 class PointRobotHumanControl(RosProcessingComm):
 	def __init__(self, dim=2, udp_ip='127.0.0.1', udp_recv_port=8025, udp_send_port=6001):
 		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)
-		self.period = rospy.Duration(1.0/60.0)
+		if rospy.has_param('framerate'):
+			self.frame_rate = rospy.get_param('framerate')
+		else:
+			self.frame_rate = 60.0
+		
+		self.period = rospy.Duration(1.0/self.frame_rate)
 		self.lock = threading.Lock()
 		rospy.Subscriber('joy', Joy, self.joyCB)
 		self.human_control_pub = rospy.Publisher('user_vel', CartVelCmd, queue_size=1)
@@ -33,8 +38,16 @@ class PointRobotHumanControl(RosProcessingComm):
 			self._max_cart_vel = np.ones(self.dim)
 			rospy.logwarn('No rosparam for max_cart_vel found...Defaulting to max linear velocity of 50 cm/s and max rotational velocity of 50 degrees/s')
 
-		self.width = 400
-		self.height = 300
+		if rospy.has_param('width'):
+			self.width = rospy.get_param('width')
+		else:
+			self.width = 1200
+
+		if rospy.has_param('height'):
+			self.height = rospy.get_param('height')
+		else:
+			self.height = 900 
+
 		self.user_vel = CartVelCmd()
 		_dim = [MultiArrayDimension()]
 		_dim[0].label = 'cartesian_velocity'
