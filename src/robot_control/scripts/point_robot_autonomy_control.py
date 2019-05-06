@@ -7,6 +7,7 @@ from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import MultiArrayDimension
 from std_msgs.msg import Header
 from std_msgs.msg import String
+from robot_control.srv import GoalPoses, GoalPosesResponse, GoalPosesRequest
 
 from geometry_msgs.msg import Point
 from robot_control.msg import CartVelCmd
@@ -17,8 +18,10 @@ import random
 import numpy as np
 import threading
 
+npa=np.array
+
 class PointRobotAutonomyControl(RosProcessingComm):
-	def __init__(self, dim=2, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port = 6000):
+	def __init__(self, intended_goal_index = 0, dim=2, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port = 6000):
 		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)		
 		print "In constructor"
 		self.period = rospy.Duration(1.0/60.0)
@@ -27,6 +30,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.dim = dim
 		self.running = True
 		self.runningCV = threading.Condition()
+		self.intended_goal_index = intended_goal_index
 
 		self.autonomy_control_pub = None
 		self.autonomy_robot_pose_pub = None
@@ -48,6 +52,10 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.autonomy_vel.header.stamp = rospy.Time.now()
 		self.autonomy_vel.header.frame_id = 'autonomy_control'
 
+		self.autonomy_robot_pose = np.zeros(self.dim)
+		self.getRobotPosition()
+		self.autonomy_robot_pose_msg = Point()
+
 		self.data = CartVelCmd()
 		self._msg_dim = [MultiArrayDimension()]
 		self._msg_dim[0].label = 'cartesian_velocity'
@@ -58,8 +66,27 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.data.header.stamp = rospy.Time.now()
 		self.data.header.frame_id = 'autonomy_control'
 
-		self.autonomy_robot_pose = Point()
-		self.getRobotPosition()
+		#GOal positions
+		rospy.loginfo("Waiting for set_goals_node - set goals node ")
+		rospy.wait_for_service("/setgoals/goal_poses_list")
+		rospy.loginfo("set_goals_node found - set goals node!")
+
+		self.set_goals_service = rospy.ServiceProxy("/setgoals/goal_poses_list", GoalPoses)
+		
+		self.gp_req = GoalPosesRequest()
+		goal_poses_response = self.set_goals_service(self.gp_req)
+		print goal_poses_response.goal_poses
+		self.num_goals = len(goal_poses_response.goal_poses)
+		assert(self.num_goals > 0)
+
+		self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+		for i in range(self.num_goals):
+			self.goal_positions[i][0] = goal_poses_response.goal_poses[i].x
+			self.goal_positions[i][1] = goal_poses_response.goal_poses[i].y
+
+		# self.goal_service_client = rospy.ServiceProxy('/setgoals/setgoalposes', )
+
+		
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()
@@ -84,7 +111,8 @@ class PointRobotAutonomyControl(RosProcessingComm):
 				self.lock.release()
 
 			self.autonomy_control_pub.publish(data)
-			self.autonomy_robot_pose_pub.publish(self.autonomy_robot_pose)
+
+			self.autonomy_robot_pose_pub.publish(self.autonomy_robot_pose_msg)
 			msg_str = self.createMessageString(self.autonomy_vel)
 			self.sendStrToProcessing(msg_str)
 
@@ -108,17 +136,22 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		msg_str = self.recvStrFromProcessing()
 		if msg_str != "none":
 			msg_str = msg_str.split(',')
-			self.autonomy_robot_pose.x = float(msg_str[1])
-			self.autonomy_robot_pose.y = float(msg_str[2])
+			self.autonomy_robot_pose[0] = float(msg_str[1])
+			self.autonomy_robot_pose[1] = float(msg_str[2])
+			self.autonomy_robot_pose_msg.x = float(msg_str[1])
+			self.autonomy_robot_pose_msg.y = float(msg_str[2])
 
 	def step(self):
 		self.getRobotPosition()
 		for i in range(self.dim):
 			self.autonomy_vel.velocity.data[i] = 0.0
+		for i in range(self.dim):
+			self.autonomy_vel.velocity.data[i] = 0.05*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
 
-		#DUse the current robot position. Use the goal positions. Compute the velocity and populate the self.autonomy_vel
-		self.autonomy_vel.velocity.data[0] =  0.1
-		self.autonomy_vel.velocity.data[1] = 0.0
+	
+		# #DUse the current robot position. Use the goal positions. Compute the velocity and populate the self.autonomy_vel
+		# self.autonomy_vel.velocity.data[0] =  0.1
+		# self.autonomy_vel.velocity.data[1] = 0.0
 
 	def spin(self):
 		rospy.loginfo("RUNNING")

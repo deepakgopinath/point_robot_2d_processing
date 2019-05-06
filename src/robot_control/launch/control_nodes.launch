@@ -3,9 +3,14 @@
 	<node pkg="joy" output="screen" type="joy_node" name="joy_node" >
 		<param name="dev" value="/dev/input/js0"/>
 	</node>
+
+	<node pkg="robot_control" output="screen" type="set_goals.py" name="set_goals"/>
+	
 	<node pkg="robot_control" output="screen" type="point_robot_human_control.py" name="point_robot_human_control" respawn="true"/>
 
 	<node pkg="robot_control" output="screen" type="point_robot_autonomy_control.py" name="point_robot_autonomy_control" respawn="true"/>
+
+
 
 
 </launch>

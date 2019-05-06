@@ -40,7 +40,7 @@ class RosProcessingComm(object):
 				print (e)
 				sys.exit(1)
 		else:
-			msg_string = msg
+			msg_string = msg.decode()
 			# rospy.logfatal("Received message from PROCESSING APP")
 
 		return msg_string

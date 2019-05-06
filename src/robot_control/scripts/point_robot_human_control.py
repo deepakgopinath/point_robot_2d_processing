@@ -7,6 +7,7 @@ from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import MultiArrayDimension
 from std_msgs.msg import Header
 from std_msgs.msg import String
+from robot_control.srv import GoalPoses, GoalPosesResponse, GoalPosesRequest
 
 from robot_control.msg import CartVelCmd
 
@@ -15,6 +16,8 @@ import math
 import random
 import numpy as np
 import threading
+
+npa = np.array
 
 class PointRobotHumanControl(RosProcessingComm):
 	def __init__(self, dim=2, udp_ip='127.0.0.1', udp_recv_port=8025, udp_send_port=6001):
@@ -30,7 +33,8 @@ class PointRobotHumanControl(RosProcessingComm):
 			self._max_cart_vel = np.ones(self.dim)
 			rospy.logwarn('No rosparam for max_cart_vel found...Defaulting to max linear velocity of 50 cm/s and max rotational velocity of 50 degrees/s')
 
-
+		self.width = 400
+		self.height = 300
 		self.user_vel = CartVelCmd()
 		_dim = [MultiArrayDimension()]
 		_dim[0].label = 'cartesian_velocity'
@@ -50,6 +54,24 @@ class PointRobotHumanControl(RosProcessingComm):
 		self.data.velocity.data = np.zeros(self.dim)
 		self.data.header.stamp = rospy.Time.now()
 		self.data.header.frame_id = 'human_control'
+
+
+		rospy.loginfo("Waiting for set_goals_node - set goals node ")
+		rospy.wait_for_service("/setgoals/goal_poses_list")
+		rospy.loginfo("set_goals_node found - set goals node!")
+
+		self.set_goals_service = rospy.ServiceProxy("/setgoals/goal_poses_list", GoalPoses)
+		
+		self.gp_req = GoalPosesRequest()
+		goal_poses_response = self.set_goals_service(self.gp_req)
+		print goal_poses_response.goal_poses
+		self.num_goals = len(goal_poses_response.goal_poses)
+		assert(self.num_goals > 0)
+
+		self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+		for i in range(self.num_goals):
+			self.goal_positions[i][0] = goal_poses_response.goal_poses[i].x + self.width/2.0 #This is specific to the way the processing sketch is setup. The human control is on the right half of the window. therefore thye width/2.0 bias
+			self.goal_positions[i][1] = goal_poses_response.goal_poses[i].y
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()

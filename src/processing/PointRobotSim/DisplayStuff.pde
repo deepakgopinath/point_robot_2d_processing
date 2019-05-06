@@ -1,6 +1,6 @@
 void displayGoals()
 {
-  for (Goal g : robot_goalList)
+  for (Goal g : autonomy_goalList)
   {
     g.display();
   }

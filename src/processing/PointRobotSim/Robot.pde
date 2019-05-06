@@ -6,14 +6,30 @@ class Robot{
   float rb; // right bound
   color col;
   
-  Robot(float init_x_, float init_y_, float init_radius_, float lb_, float rb_)
+  Robot(float init_x_, float init_y_, float init_radius_, float lb_, float rb_,  String colorType)
   {
     position = new PVector(init_x_, init_y_);
     radius = init_radius_;
     velocity = new PVector(0.0, 0.0);
     lb = lb_;
     rb = rb_;
-    col = color(255, 255, 255);
+    if (colorType == "r")
+    {
+      col = color(255, 0, 0);
+    }else if (colorType == "g")
+    {
+      col = color(0, 255, 0);
+    }
+    else if (colorType == "b")
+    {
+      col = color(0, 0, 255);
+    }else if (colorType == "w")
+    {
+      col = color(255);
+    }else if(colorType == "gray")
+    {
+      col = color(127);
+    }
   }
   
   void display()
