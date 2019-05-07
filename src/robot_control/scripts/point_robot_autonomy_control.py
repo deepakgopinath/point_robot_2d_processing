@@ -74,7 +74,6 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.autonomy_robot_pose_msg = Point()
 		self.getRobotPosition()
 
-
 		self.data = CartVelCmd()
 		self._msg_dim = [MultiArrayDimension()]
 		self._msg_dim[0].label = 'cartesian_velocity'
@@ -175,12 +174,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 			self.autonomy_vel.velocity.data[i] = 0.0
 
 		for i in range(self.dim):
-			self.autonomy_vel.velocity.data[i] = 0.4*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
-
-
-		# #DUse the current robot position. Use the goal positions. Compute the velocity and populate the self.autonomy_vel
-		# self.autonomy_vel.velocity.data[0] =  0.1
-		# self.autonomy_vel.velocity.data[1] = 0.0
+			self.autonomy_vel.velocity.data[i] = self.velocity_scale*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
 
 	def spin(self):
 		rospy.loginfo("RUNNING")
