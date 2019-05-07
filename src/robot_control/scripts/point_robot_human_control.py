@@ -87,8 +87,6 @@ class PointRobotHumanControl(RosProcessingComm):
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()
-		# while not rospy.is_shutdown():
-		# 	print " "
 
 	def _publish_command(self, period):
 		while not rospy.is_shutdown():

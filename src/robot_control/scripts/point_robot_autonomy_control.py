@@ -93,11 +93,8 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.retrieve_goals_service = rospy.ServiceProxy("/setgoals/goal_poses_list", GoalPoses)
 
 		rospy.Service('/point_robot_autonomy_control/trigger_trial', SetBool, self.trigger_trial)
-		# rospy.Service('/point_robot_autonomy_control/retrieve_goals', Trigger, self.retrieve_goals)
 
 		self.gp_req = GoalPosesRequest()
-		# self.num_goals = 0
-		# self.goal_positions =  self.goal_positions = npa([[0]*self.dim]*2, dtype= 'f')
 		goal_poses_response = self.retrieve_goals_service(self.gp_req)
 		self.num_goals = len(goal_poses_response.goal_poses)
 		assert(self.num_goals > 0)
@@ -106,10 +103,6 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		for i in range(self.num_goals):
 			self.goal_positions[i][0] = goal_poses_response.goal_poses[i].x
 			self.goal_positions[i][1] = goal_poses_response.goal_poses[i].y
-
-		print self.goal_positions
-
-		# self.goal_service_client = rospy.ServiceProxy('/setgoals/setgoalposes',
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()
@@ -121,19 +114,6 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.random_direction = config["random_direction"]
 		print self.signal_sparsity, self.random_direction
 		return config
-
-	# def retrieve_goals(self, req):
-	# 	status = TriggerResponse()
-	# 	goal_poses_response = self.retrieve_goals_service(self.gp_req)
-	# 	self.num_goal = len(goal_poses_response.goal_poses)
-	# 	assert(self.num_goals > 0)
-	# 	self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
-	# 	for i in range(self.num_goals):
-	# 		self.goal_positions[i][0] = goal_poses_response.goal_poses[i].x
-	# 		self.goal_positions[i][1] = goal_poses_response.goal_poses[i].y
-	# 	status.success = True
-	# 	return success
-
 
 	def trigger_trial(self, req):
 		status = SetBoolResponse()

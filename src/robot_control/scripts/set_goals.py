@@ -37,7 +37,7 @@ class SetGoals(RosProcessingComm):
 			self.height = rospy.get_param('height')
 		else:
 			self.height = 900
-			
+
 		self.init_goal_positions()
 
 		rospy.Service("setgoals/goal_poses_list", GoalPoses, self.goal_poses_list)
@@ -87,37 +87,6 @@ class SetGoals(RosProcessingComm):
 
 		goal_poses_response.status = True
 		return goal_poses_response
-
-	# def step(self):
-	# 	msg_str = self.recvStrFromProcessing()
-	# 	if msg_str != "none":
-	# 		msg_str = msg_str.split(',')
-	# 		print msg_str
-	# 		if msg_str[0] == 'GOALS_READY':
-	# 			msg_string = self.createMsgString()
-	# 			# print msg_string
-	# 			self.sendStrToProcessing(msg_string)
-	# 		elif msg_str[0] == 'GOALS_RESET':
-	# 			pass
-	#
-	#
-	# def spin(self):
-	# 	rospy.loginfo("RUNNING")
-	# 	try:
-	# 		while not rospy.is_shutdown():
-	# 			self.runningCV.acquire()
-	# 			if self.running:
-	# 				self.step()
-	# 				self.rate.sleep()
-	# 			else:
-	# 				self.runningCV.wait(1.0)
-	#
-	# 			self.runningCV.release()
-	# 	except KeyboardInterrupt:
-	# 		rospy.logdebug('Keyboard interrupt, shutting down')
-	# 		rospy.core.signal_shutdown('Keyboard interrupt')
-
-
 
 if __name__ == '__main__':
 	rospy.init_node('set_goals')

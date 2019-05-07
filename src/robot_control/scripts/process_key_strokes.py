@@ -31,7 +31,6 @@ class ProcessKeyStrokes(RosProcessingComm):
         self.send_goals_to_processing_service = rospy.ServiceProxy('/setgoals/send_goals_to_processing', Trigger)
         self.reset_goals = rospy.ServiceProxy('/setgoals/reset_goals', Trigger)
         self.autonomy_node_trigger_trial = rospy.ServiceProxy('/point_robot_autonomy_control/trigger_trial', SetBool)
-        # self.autonomy_node_retrieve_goals = rospy.ServiceProxy('/point_robot_autonomy_control/retrieve_goals', Trigger)
 
     def step(self):
         msg_str = self.recvStrFromProcessing()
