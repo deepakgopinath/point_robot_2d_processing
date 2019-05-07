@@ -8,6 +8,8 @@ from std_msgs.msg import MultiArrayDimension
 from std_msgs.msg import Header
 from std_msgs.msg import String
 from robot_control.srv import GoalPoses, GoalPosesResponse, GoalPosesRequest
+from std_srvs.srv import SetBool, SetBoolRequest, SetBoolResponse
+from std_srvs.srv import Trigger, TriggerRequest, TriggerResponse
 
 from geometry_msgs.msg import Point
 from robot_control.msg import CartVelCmd
@@ -23,7 +25,7 @@ npa=np.array
 
 class PointRobotAutonomyControl(RosProcessingComm):
 	def __init__(self, intended_goal_index = 0, dim=2, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port = 6000):
-		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)		
+		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)
 		print "In constructor"
 
 		if rospy.has_param('framerate'):
@@ -33,14 +35,14 @@ class PointRobotAutonomyControl(RosProcessingComm):
 
 		# self.frame_rate = 60.0
 
-		self.server = DynamicReconfigureServer(ConfigType, self.reconfigureParams)
+		# self.server = DynamicReconfigureServer(ConfigType, self.reconfigureParams)
 		self.signal_sparsity = 0.0
 		self.random_direction = 0.0
 
-
+		self.is_trial_on = False
 		self.period = rospy.Duration(1.0/self.frame_rate)
 		self.lock = threading.Lock()
-		self.rate =rospy.Rate(60)
+		self.rate =rospy.Rate(self.frame_rate)
 		self.dim = dim
 		self.running = True
 		self.runningCV = threading.Condition()
@@ -66,10 +68,12 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.autonomy_vel.header.stamp = rospy.Time.now()
 		self.autonomy_vel.header.frame_id = 'autonomy_control'
 
+		self.velocity_scale = 0.4
+
 		self.autonomy_robot_pose = np.zeros(self.dim)
 		self.autonomy_robot_pose_msg = Point()
 		self.getRobotPosition()
-		
+
 
 		self.data = CartVelCmd()
 		self._msg_dim = [MultiArrayDimension()]
@@ -82,15 +86,19 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.data.header.frame_id = 'autonomy_control'
 
 		#GOal positions
-		rospy.loginfo("Waiting for set_goals_node - set goals node ")
+		rospy.loginfo("Waiting for set_goals_node - point_robot_autonomy_control node ")
 		rospy.wait_for_service("/setgoals/goal_poses_list")
-		rospy.loginfo("set_goals_node found - set goals node!")
+		rospy.loginfo("set_goals_node found - point_robot_autonomy_control node!")
 
-		self.set_goals_service = rospy.ServiceProxy("/setgoals/goal_poses_list", GoalPoses)
-		
+		self.retrieve_goals_service = rospy.ServiceProxy("/setgoals/goal_poses_list", GoalPoses)
+
+		rospy.Service('/point_robot_autonomy_control/trigger_trial', SetBool, self.trigger_trial)
+		# rospy.Service('/point_robot_autonomy_control/retrieve_goals', Trigger, self.retrieve_goals)
+
 		self.gp_req = GoalPosesRequest()
-		goal_poses_response = self.set_goals_service(self.gp_req)
-		print goal_poses_response.goal_poses
+		# self.num_goals = 0
+		# self.goal_positions =  self.goal_positions = npa([[0]*self.dim]*2, dtype= 'f')
+		goal_poses_response = self.retrieve_goals_service(self.gp_req)
 		self.num_goals = len(goal_poses_response.goal_poses)
 		assert(self.num_goals > 0)
 
@@ -99,21 +107,39 @@ class PointRobotAutonomyControl(RosProcessingComm):
 			self.goal_positions[i][0] = goal_poses_response.goal_poses[i].x
 			self.goal_positions[i][1] = goal_poses_response.goal_poses[i].y
 
-		# self.goal_service_client = rospy.ServiceProxy('/setgoals/setgoalposes', )
+		print self.goal_positions
 
-		
+		# self.goal_service_client = rospy.ServiceProxy('/setgoals/setgoalposes',
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()
 
-		
-	def reconfigureParams(self, config):
+
+	def reconfigureParams(self, level, config):
 		print "IN CONFIG"
 		self.signal_sparsity = config["signal_sparsity"]
 		self.random_direction = config["random_direction"]
 		print self.signal_sparsity, self.random_direction
 		return config
 
+	# def retrieve_goals(self, req):
+	# 	status = TriggerResponse()
+	# 	goal_poses_response = self.retrieve_goals_service(self.gp_req)
+	# 	self.num_goal = len(goal_poses_response.goal_poses)
+	# 	assert(self.num_goals > 0)
+	# 	self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+	# 	for i in range(self.num_goals):
+	# 		self.goal_positions[i][0] = goal_poses_response.goal_poses[i].x
+	# 		self.goal_positions[i][1] = goal_poses_response.goal_poses[i].y
+	# 	status.success = True
+	# 	return success
+
+
+	def trigger_trial(self, req):
+		status = SetBoolResponse()
+		self.is_trial_on = req.data
+		status.success = True
+		return status
 
 	def initializePublishers(self):
 		self.autonomy_control_pub = rospy.Publisher('autonomy_vel', CartVelCmd, queue_size=1)
@@ -121,29 +147,29 @@ class PointRobotAutonomyControl(RosProcessingComm):
 
 	def _publish_command(self, period):
 		while not rospy.is_shutdown():
-			start = rospy.get_rostime()
-			self.lock.acquire()
-			try:
-				data = CartVelCmd()
-				data.velocity.data = self.autonomy_vel.velocity.data
-				data.velocity.layout.dim = self._msg_dim
-				data.header.stamp = rospy.Time.now()
-				data.header.frame_id = 'autonomy_control'
-			finally:
-				self.lock.release()
+			if self.is_trial_on:
+				start = rospy.get_rostime()
+				self.lock.acquire()
+				try:
+					data = CartVelCmd()
+					data.velocity.data = self.autonomy_vel.velocity.data
+					data.velocity.layout.dim = self._msg_dim
+					data.header.stamp = rospy.Time.now()
+					data.header.frame_id = 'autonomy_control'
+				finally:
+					self.lock.release()
 
-			self.autonomy_control_pub.publish(data)
+				self.autonomy_control_pub.publish(data)
+				self.autonomy_robot_pose_pub.publish(self.autonomy_robot_pose_msg)
+				msg_str = self.createMessageString(self.autonomy_vel)
+				self.sendStrToProcessing(msg_str)
 
-			self.autonomy_robot_pose_pub.publish(self.autonomy_robot_pose_msg)
-			msg_str = self.createMessageString(self.autonomy_vel)
-			self.sendStrToProcessing(msg_str)
+				end = rospy.get_rostime()
 
-			end = rospy.get_rostime()
-
-			if end - start < period:
-				rospy.sleep(period - (end-start))
-			else:
-				rospy.logwarn("Sending data took longer than the specified period")
+				if end - start < period:
+					rospy.sleep(period - (end-start))
+				else:
+					rospy.logwarn("Sending data took longer than the specified period")
 
 	def createMessageString(self, av):
 		msg_str = "AUTONOMY_COMMAND"
@@ -153,24 +179,25 @@ class PointRobotAutonomyControl(RosProcessingComm):
 
 		return msg_str
 
-
 	def getRobotPosition(self):
 		msg_str = self.recvStrFromProcessing()
 		if msg_str != "none":
 			msg_str = msg_str.split(',')
-			self.autonomy_robot_pose[0] = float(msg_str[1])
-			self.autonomy_robot_pose[1] = float(msg_str[2])
-			self.autonomy_robot_pose_msg.x = float(msg_str[1])
-			self.autonomy_robot_pose_msg.y = float(msg_str[2])
+			if msg_str[0] == "ROBOT_POSE":
+				self.autonomy_robot_pose[0] = float(msg_str[1])
+				self.autonomy_robot_pose[1] = float(msg_str[2])
+				self.autonomy_robot_pose_msg.x = float(msg_str[1])
+				self.autonomy_robot_pose_msg.y = float(msg_str[2])
 
 	def step(self):
 		self.getRobotPosition()
 		for i in range(self.dim):
 			self.autonomy_vel.velocity.data[i] = 0.0
+
 		for i in range(self.dim):
 			self.autonomy_vel.velocity.data[i] = 0.4*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
 
-	
+
 		# #DUse the current robot position. Use the goal positions. Compute the velocity and populate the self.autonomy_vel
 		# self.autonomy_vel.velocity.data[0] =  0.1
 		# self.autonomy_vel.velocity.data[1] = 0.0
@@ -199,6 +226,3 @@ if __name__ == '__main__':
 		point_robot_autonomy_control.spin()
 	except rospy.ROSInterruptException:
 		pass
-
-
-

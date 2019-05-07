@@ -40,6 +40,11 @@ String HUMAN_DEST_IP = "127.0.0.1";
 int HUMAN_DEST_PORT = 8025;
 int HUMAN_HOST_PORT = 6001;
 
+UDP key_udp;
+String KEY_DEST_IP = "127.0.0.1";
+int KEY_DEST_PORT = 8026;
+int KEY_HOST_PORT = 6002;
+
 //Goals
 
 ArrayList <Goal> autonomy_goalList;
@@ -82,6 +87,8 @@ void setup()
   autonomy_udp.listen(true);
   human_udp = new UDP(this, HUMAN_HOST_PORT);
   human_udp.listen(true);
+  key_udp = new UDP(this, KEY_HOST_PORT);
+  key_udp.listen(true);
 
   allInitialized = true;
 }
@@ -101,13 +108,36 @@ void draw()
   {
 
     autonomy_rob_pos = autonomy_robot.getPosition();
-    String autonomy_rob_pos_message = "AutonomyRobotPosition," + str(autonomy_rob_pos.x) + "," + str(autonomy_rob_pos.y);
+    String autonomy_rob_pos_message = "ROBOT_POSE," + str(autonomy_rob_pos.x) + "," + str(autonomy_rob_pos.y);
     sendUDP(autonomy_rob_pos_message, AUTONOMY_DEST_IP, AUTONOMY_DEST_PORT, autonomy_udp);
     //human_rob_pos = human_robot.getPosition();
     //String human_rob_pos_message = "humanRobotPosition," + str(human_rob_pos.x) + "," + str(human_rob_pos.y);
     //sendUDP(human_rob_pos_message, HUMAN_DEST_IP, HUMAN_DEST_PORT, human_udp);
     now = millis();
   }
+}
+
+void keyPressed()
+{
+  String message = "unknown";
+  if (key == 'G' || key == 'g')
+  {
+    message = "GOALS_READY";
+  }
+  if (key == 'R' || key == 'r')
+  {
+    message = "GOALS_RESET";
+  }
+  if (key == 'B' || key == 'b')
+  {
+    message = "BEGIN_TRIAL";
+  }
+  if (key == 'E' || key == 'e')
+  {
+    message = "END_TRIAL";
+  }
+  println(message);
+  sendUDP(message, KEY_DEST_IP, KEY_DEST_PORT, key_udp);
 }
 
 

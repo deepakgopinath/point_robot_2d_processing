@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   ros_processing_bridge
   std_msgs
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions

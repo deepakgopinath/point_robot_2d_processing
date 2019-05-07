@@ -26,7 +26,7 @@ class PointRobotHumanControl(RosProcessingComm):
 			self.frame_rate = rospy.get_param('framerate')
 		else:
 			self.frame_rate = 60.0
-		
+
 		self.period = rospy.Duration(1.0/self.frame_rate)
 		self.lock = threading.Lock()
 		rospy.Subscriber('joy', Joy, self.joyCB)
@@ -46,7 +46,7 @@ class PointRobotHumanControl(RosProcessingComm):
 		if rospy.has_param('height'):
 			self.height = rospy.get_param('height')
 		else:
-			self.height = 900 
+			self.height = 900
 
 		self.user_vel = CartVelCmd()
 		_dim = [MultiArrayDimension()]
@@ -69,15 +69,14 @@ class PointRobotHumanControl(RosProcessingComm):
 		self.data.header.frame_id = 'human_control'
 
 
-		rospy.loginfo("Waiting for set_goals_node - set goals node ")
+		rospy.loginfo("Waiting for set_goals_node - point_robot_human_control node ")
 		rospy.wait_for_service("/setgoals/goal_poses_list")
-		rospy.loginfo("set_goals_node found - set goals node!")
+		rospy.loginfo("set_goals_node found - point_robot_human_control node!")
 
 		self.set_goals_service = rospy.ServiceProxy("/setgoals/goal_poses_list", GoalPoses)
-		
+
 		self.gp_req = GoalPosesRequest()
 		goal_poses_response = self.set_goals_service(self.gp_req)
-		print goal_poses_response.goal_poses
 		self.num_goals = len(goal_poses_response.goal_poses)
 		assert(self.num_goals > 0)
 
@@ -116,8 +115,6 @@ class PointRobotHumanControl(RosProcessingComm):
 			else:
 				rospy.logwarn("Sending data took longer than the specified period")
 
-
-
 	def createMessageString(self, uv):
 		msg_str = "HUMAN_COMMAND"
 		for i in range(self.dim):
@@ -126,7 +123,7 @@ class PointRobotHumanControl(RosProcessingComm):
 
 		return msg_str
 
-	
+
 	def joyCB(self, msg):
 		_axes = np.array(msg.axes)
 		for i in range(self.dim):
@@ -136,7 +133,7 @@ class PointRobotHumanControl(RosProcessingComm):
 		self.user_vel.velocity.data[1] = -_axes[1] * self._max_cart_vel[1]
 		self.user_vel.header.stamp = rospy.Time.now()
 
-	
+
 
 
 if __name__ == '__main__':
@@ -146,6 +143,3 @@ if __name__ == '__main__':
 
 	except rospy.ROSInterruptException:
 		pass
-
-
-

@@ -7,12 +7,16 @@ import rospy
 
 class RosProcessingComm(object):
 	def __init__(self, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port=6000):
-		
-		self.rate = 40.0
+
+		if rospy.has_param('framerate'):
+			self.frame_rate = rospy.get_param('framerate')
+		else:
+			self.frame_rate = 60.0
+		self.rate = self.frame_rate
 		self.udp_ip = udp_ip
 		self.udp_send_port = udp_send_port
 		self.udp_recv_port = udp_recv_port
-		
+
 		self.sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.sock_send.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
@@ -40,7 +44,7 @@ class RosProcessingComm(object):
 				print (e)
 				sys.exit(1)
 		else:
-			msg_string = msg.decode()
+			msg_string = msg
 			# rospy.logfatal("Received message from PROCESSING APP")
 
 		return msg_string
