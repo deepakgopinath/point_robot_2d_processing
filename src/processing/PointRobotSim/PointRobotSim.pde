@@ -56,7 +56,7 @@ boolean isGoalInitialized = false;
 boolean allInitialized = false;
 
 //General
-
+int TEXT_SIZE = 18;
 void setup()
 {
   size(800, 600);
@@ -100,10 +100,11 @@ void draw()
   strokeWeight(2);
   stroke(255);
   line(width/2.0, 0, width/2.0, height);
+  printText();
   displayGoals();
   autonomy_robot.display();
   human_robot.display();
-
+  //checkGoalEndCondition();
   if (millis () > now + 100);
   {
 

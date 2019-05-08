@@ -29,4 +29,9 @@ class Goal
     ellipseMode(RADIUS);
     ellipse(position.x, position.y, radius, radius);
   }
+  
+  PVector getPosition()
+  {
+    return position;
+  }
 }
