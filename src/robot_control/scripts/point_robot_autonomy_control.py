@@ -68,7 +68,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.autonomy_vel.header.stamp = rospy.Time.now()
 		self.autonomy_vel.header.frame_id = 'autonomy_control'
 
-		self.velocity_scale = 0.4
+		self.velocity_scale = 0.25
 
 		self.autonomy_robot_pose = np.zeros(self.dim)
 		self.autonomy_robot_pose_msg = Point()
@@ -85,11 +85,11 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.data.header.frame_id = 'autonomy_control'
 
 		#GOal positions
-		rospy.loginfo("Waiting for set_goals_node - point_robot_autonomy_control node ")
-		rospy.wait_for_service("/setgoals/goal_poses_list")
-		rospy.loginfo("set_goals_node found - point_robot_autonomy_control node!")
+		rospy.loginfo("Waiting for self_goals_robot_node - point_robot_autonomy_control node ")
+		rospy.wait_for_service("/setgoalsrobot/goal_poses_list")
+		rospy.loginfo("self_goals_robot_node found - point_robot_autonomy_control node!")
 
-		self.retrieve_goals_service = rospy.ServiceProxy("/setgoals/goal_poses_list", GoalPoses)
+		self.retrieve_goals_service = rospy.ServiceProxy("/setgoalsrobot/goal_poses_list", GoalPoses)
 
 		rospy.Service('/point_robot_autonomy_control/trigger_trial', SetBool, self.trigger_trial)
 

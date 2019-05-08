@@ -69,14 +69,14 @@ class PointRobotHumanControl(RosProcessingComm):
 		self.data.header.frame_id = 'human_control'
 
 
-		rospy.loginfo("Waiting for set_goals_node - point_robot_human_control node ")
-		rospy.wait_for_service("/setgoals/goal_poses_list")
-		rospy.loginfo("set_goals_node found - point_robot_human_control node!")
+		rospy.loginfo("Waiting for self_goals_robot_node - point_robot_human_control node ")
+		rospy.wait_for_service("/setgoalsrobot/goal_poses_list")
+		rospy.loginfo("self_goals_robot_node found - point_robot_human_control node!")
 
-		self.set_goals_service = rospy.ServiceProxy("/setgoals/goal_poses_list", GoalPoses)
+		self.self_goals_robot_service = rospy.ServiceProxy("/setgoalsrobot/goal_poses_list", GoalPoses)
 
 		self.gp_req = GoalPosesRequest()
-		goal_poses_response = self.set_goals_service(self.gp_req)
+		goal_poses_response = self.self_goals_robot_service(self.gp_req)
 		self.num_goals = len(goal_poses_response.goal_poses)
 		assert(self.num_goals > 0)
 

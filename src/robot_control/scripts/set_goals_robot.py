@@ -12,12 +12,13 @@ from std_srvs.srv import Trigger, TriggerRequest, TriggerResponse
 
 npa = np.array
 
-class SetGoals(RosProcessingComm):
+class SetGoalsRobot(RosProcessingComm):
 	def __init__(self, dim=2, num_goals=2, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port = 6000):
 		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)
 		self.dim = dim
 		self.num_goals = num_goals
 		self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+		self.robot_position = npa([0]*self.dim, dtype='f')
 
 		if rospy.has_param('framerate'):
 			self.frame_rate = rospy.get_param('framerate')
@@ -39,17 +40,27 @@ class SetGoals(RosProcessingComm):
 			self.height = 900
 
 		self.init_goal_positions()
+		self.init_robot_position()
 
-		rospy.Service("setgoals/goal_poses_list", GoalPoses, self.goal_poses_list)
-		rospy.Service("setgoals/send_goals_to_processing", Trigger, self.send_goals_to_processing)
-		rospy.Service("setgoals/reset_goals", Trigger, self.reset_goals)
+		rospy.Service("setgoalsrobot/goal_poses_list", GoalPoses, self.goal_poses_list)
+		rospy.Service("setgoalsrobot/send_goals_to_processing", Trigger, self.send_goals_to_processing)
+		rospy.Service("setgoalsrobot/send_robot_pose_to_processing", Trigger, self.send_robot_pose_to_processing)
+		rospy.Service("setgoalsrobot/reset_goals", Trigger, self.reset_goals)
 
 	def send_goals_to_processing(self, req):
 		status = TriggerResponse()
-		msg_string = self.createMsgString()
+		msg_string = self.createMsgString('goal_pose')
 		self.sendStrToProcessing(msg_string)
 		status.success = True
 		return status
+
+	def send_robot_pose_to_processing(self, req):
+		status = TriggerResponse()
+		msg_string = self.createMsgString('robot_pose')
+		self.sendStrToProcessing(msg_string)
+		status.success = True
+		return status
+
 
 	def reset_goals(self, req):
 		status = TriggerResponse()
@@ -61,14 +72,23 @@ class SetGoals(RosProcessingComm):
 		pass
 
 
-	def createMsgString(self):
-		msg_string = "GOALPOS"
-		msg_string += ","+str(self.num_goals)
-		for i in range(self.num_goals):
-			for j in range(self.dim):
-				msg_string += ","+str(self.goal_positions[i][j])
+	def createMsgString(self, msg_type):
+		if msg_type == 'goal_pose':
+			msg_string = "GOALPOS"
+			msg_string += ","+str(self.num_goals)
+			for i in range(self.num_goals):
+				for j in range(self.dim):
+					msg_string += ","+str(self.goal_positions[i][j])
+		elif msg_type == 'robot_pose':
+			msg_string = "ROBOTPOS"
+			for i in range(self.dim):
+				msg_string += ","+str(self.robot_position[i])
 
 		return msg_string
+
+	def init_robot_position(self):
+		self.robot_position[0] = self.width/4.0
+		self.robot_position[1] = self.height/2.0
 
 	def init_goal_positions(self):
 		if self.num_goals == 2:
@@ -89,11 +109,11 @@ class SetGoals(RosProcessingComm):
 		return goal_poses_response
 
 if __name__ == '__main__':
-	rospy.init_node('set_goals')
-	rospy.loginfo("In set goals node")
+	rospy.init_node('set_goals_and_robot')
+	rospy.loginfo("In set goals_and_robot node")
 
 	try:
-		set_goals_node = SetGoals()
+		set_goals_robot_node = SetGoalsRobot()
 		rospy.spin()
 	except rospy.ROSInterruptException:
 		pass

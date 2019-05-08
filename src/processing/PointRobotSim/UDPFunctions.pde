@@ -38,4 +38,10 @@ void processMessage(String message, String ip, int port)
     init_goals(message_list);
     isGoalInitialized = true;
   }
+  
+  if(message_list[0].equals("ROBOTPOS"))
+  {
+    init_robot(message_list);
+    isRobotInitialized = true;
+  }
 }

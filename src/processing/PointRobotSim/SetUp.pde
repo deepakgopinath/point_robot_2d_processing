@@ -14,8 +14,19 @@ void init_goals(String[] message_list)
 
     goal_human_x = float(message_list[2*(i+1)]) + width/2.0;
     goal_human_y = float(message_list[2*(i+1) + 1]);
-    
-    human_goalList.add(new Goal(goal_human_x, goal_human_y, GOAL_RADIUS, human_goal_color));
 
+    human_goalList.add(new Goal(goal_human_x, goal_human_y, GOAL_RADIUS, human_goal_color));
   }
+  isGoalInitialized = true;
+}
+
+void init_robot(String[] message_list)
+{
+  PVector ar_pos = new PVector(float(message_list[1]), float(message_list[2]));
+  autonomy_robot.setPosition(ar_pos);
+  println(ar_pos);
+  PVector hr_pos = new PVector(float(message_list[1]) + width/2.0, float(message_list[2]));
+  println(hr_pos);
+  human_robot.setPosition(hr_pos);
+  isRobotInitialized = true;
 }

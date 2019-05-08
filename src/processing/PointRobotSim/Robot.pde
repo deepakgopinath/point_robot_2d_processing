@@ -45,7 +45,11 @@ class Robot{
   {
     return position;
   }
-  
+  void setPosition(PVector pos)
+  {
+    position.x = pos.x;
+    position.y = pos.y;
+  }
   PVector getVelocity()
   {
     return velocity;

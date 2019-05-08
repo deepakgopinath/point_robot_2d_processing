@@ -53,6 +53,7 @@ ArrayList <Goal> human_goalList;
 //Bools 
 
 boolean isGoalInitialized = false;
+boolean isRobotInitialized = false;
 boolean allInitialized = false;
 
 //General
@@ -70,8 +71,10 @@ void setup()
   smooth();
   now = millis();
 
-  autonomy_robot = new Robot((AUTONOMY_ROBOT_LB + AUTONOMY_ROBOT_RB)/2.0, height/2.0, ROBOT_RADIUS, AUTONOMY_ROBOT_LB, AUTONOMY_ROBOT_RB, autonomy_rob_color);
-  human_robot = new Robot((HUMAN_ROBOT_LB + HUMAN_ROBOT_RB)/2.0, height/2.0, ROBOT_RADIUS, HUMAN_ROBOT_LB, HUMAN_ROBOT_RB, human_rob_color);
+  //autonomy_robot = new Robot((AUTONOMY_ROBOT_LB + AUTONOMY_ROBOT_RB)/2.0, height/2.0, ROBOT_RADIUS, AUTONOMY_ROBOT_LB, AUTONOMY_ROBOT_RB, autonomy_rob_color);
+  //human_robot = new Robot((HUMAN_ROBOT_LB + HUMAN_ROBOT_RB)/2.0, height/2.0, ROBOT_RADIUS, HUMAN_ROBOT_LB, HUMAN_ROBOT_RB, human_rob_color);
+  autonomy_robot = new Robot(0.0, 0.0, ROBOT_RADIUS, AUTONOMY_ROBOT_LB, AUTONOMY_ROBOT_RB, autonomy_rob_color);
+  human_robot = new Robot(0.0, 0.0, ROBOT_RADIUS, HUMAN_ROBOT_LB, HUMAN_ROBOT_RB, human_rob_color);
 
   autonomy_rob_pos = autonomy_robot.getPosition();
   human_rob_pos = human_robot.getPosition();
@@ -101,10 +104,15 @@ void draw()
   stroke(255);
   line(width/2.0, 0, width/2.0, height);
   printText();
-  displayGoals();
-  autonomy_robot.display();
-  human_robot.display();
-  //checkGoalEndCondition();
+  if (isGoalInitialized)
+  { 
+    displayGoals();
+  }
+  if (isRobotInitialized)
+  {
+    displayRobots();
+  }
+
   if (millis () > now + 100);
   {
 
@@ -137,14 +145,11 @@ void keyPressed()
   {
     message = "END_TRIAL";
   }
+  if (key == 'I' || key == 'i')
+  {
+    message = "ROBOT_READY";
+  }
+
   println(message);
   sendUDP(message, KEY_DEST_IP, KEY_DEST_PORT, key_udp);
 }
-
-
-//void mouseDragged()
-//{
-//  PVector currentMousePoint = new PVector(mouseX, mouseY, 0);
-//  PVector prevMousePoint = new PVector(pmouseX, pmouseY, 0);
-//  //rob_vel = PVector.sub(currentMousePoint, prevMousePoint);
-//}
