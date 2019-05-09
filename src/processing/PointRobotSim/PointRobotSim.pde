@@ -6,39 +6,39 @@ import hypermedia.net.*;
 //Global variables;
 int now;
 
-int AUTONOMY_ROBOT_LB;
-int AUTONOMY_ROBOT_RB;
+int A_R_LB;
+int A_R_RB;
 
-int HUMAN_ROBOT_LB;
-int HUMAN_ROBOT_RB;
+int H_R_LB;
+int H_R_RB;
 
-Robot autonomy_robot;
-Robot human_robot;
+Robot a_r;
+Robot h_r;
 
 float ROBOT_RADIUS = 10;
 float GOAL_RADIUS = 10;
 
-PVector autonomy_rob_pos;
-PVector human_rob_pos;
+PVector a_r_pos;
+PVector h_r_pos;
 
-String autonomy_rob_color = "w";
-String human_rob_color = "gray";
+String a_r_color = "w";
+String h_r_color = "gray";
 
 
-PVector autonomy_rob_vel = new PVector(0.0, 0.0);
-PVector human_rob_vel = new PVector(0.0, 0.0);
+PVector a_r_vel = new PVector(0.0, 0.0);
+PVector h_r_vel = new PVector(0.0, 0.0);
 
 
 //UDP Variables;
-UDP autonomy_udp;
-String AUTONOMY_DEST_IP = "127.0.0.1";
-int AUTONOMY_DEST_PORT = 8025;
-int AUTONOMY_HOST_PORT = 6000;
+UDP a_udp;
+String A_DEST_IP = "127.0.0.1";
+int A_DEST_PORT = 8025;
+int A_HOST_PORT = 6000;
 
-UDP human_udp;
-String HUMAN_DEST_IP = "127.0.0.1";
-int HUMAN_DEST_PORT = 8025;
-int HUMAN_HOST_PORT = 6001;
+UDP h_udp;
+String H_DEST_IP = "127.0.0.1";
+int H_DEST_PORT = 8025;
+int H_HOST_PORT = 6001;
 
 UDP key_udp;
 String KEY_DEST_IP = "127.0.0.1";
@@ -47,17 +47,17 @@ int KEY_HOST_PORT = 6002;
 
 //Goals
 
-ArrayList <Goal> autonomy_goalList;
-ArrayList <Goal> human_goalList;
+ArrayList <Goal> a_gList;
+ArrayList <Goal> h_gList;
 
 StringDict goal_color = new StringDict();
 
 //Bools 
 
-boolean isAutonomyGoalInitialized = false;
-boolean isHumanGoalInitialized = false;
-boolean isAutonomyRobotInitialized = false;
-boolean isHumanRobotInitialized = false;
+boolean isAGInitialized = false;
+boolean isHGInitialized = false;
+boolean isARInitialized = false;
+boolean isHRInitialized = false;
 
 
 boolean allInitialized = false;
@@ -71,11 +71,11 @@ void setup()
   size(800, 600);
   frameRate(60);
   
-  AUTONOMY_ROBOT_LB = 0;
-  AUTONOMY_ROBOT_RB = width/2;
+  A_R_LB = 0;
+  A_R_RB = width/2;
 
-  HUMAN_ROBOT_LB = width/2;
-  HUMAN_ROBOT_RB = width;
+  H_R_LB = width/2;
+  H_R_RB = width;
 
   smooth();
   
@@ -96,11 +96,11 @@ void draw()
   stroke(255);
   line(width/2.0, 0, width/2.0, height);
   printText();
-  if (isAutonomyGoalInitialized && isHumanGoalInitialized)
+  if (isAGInitialized && isHGInitialized)
   { 
     displayGoals();
   }
-  if (isAutonomyRobotInitialized && isHumanRobotInitialized)
+  if (isARInitialized && isHRInitialized)
   {
     displayRobots();
   }

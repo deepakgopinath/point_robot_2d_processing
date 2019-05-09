@@ -1,12 +1,12 @@
 
 void sendRobotPoses()
 {
-  autonomy_rob_pos = autonomy_robot.getPosition();
-  String autonomy_rob_pos_message = "ROBOT_POSE," + str(autonomy_rob_pos.x) + "," + str(autonomy_rob_pos.y);
-  sendUDP(autonomy_rob_pos_message, AUTONOMY_DEST_IP, AUTONOMY_DEST_PORT, autonomy_udp);
-  human_rob_pos = human_robot.getPosition();
-  String human_rob_pos_message = "HUMAN_ROBOT_POSE," + str(human_rob_pos.x) + "," + str(human_rob_pos.y);
-  sendUDP(human_rob_pos_message, HUMAN_DEST_IP, HUMAN_DEST_PORT, human_udp);
+  a_r_pos = a_r.getPosition();
+  String a_r_pos_message = "ROBOT_POSE," + str(a_r_pos.x) + "," + str(a_r_pos.y);
+  sendUDP(a_r_pos_message, A_DEST_IP, A_DEST_PORT, a_udp);
+  h_r_pos = h_r.getPosition();
+  String h_r_pos_message = "HUMAN_ROBOT_POSE," + str(h_r_pos.x) + "," + str(h_r_pos.y);
+  sendUDP(h_r_pos_message, H_DEST_IP, H_DEST_PORT, h_udp);
 }
 
 

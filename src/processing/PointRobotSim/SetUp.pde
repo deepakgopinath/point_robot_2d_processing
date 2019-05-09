@@ -1,63 +1,75 @@
-void init_autonomy_goals(String[] message_list)
+void init_a_g(String[] message_list)
 {
   int num_goals = int(message_list[1]);
-  String autonomy_goal_color = "r";
-  float goal_autonomy_x, goal_autonomy_y;
+  String a_g_color = "r";
+  float a_g_x, a_g_y;
 
   for (int i=0; i < num_goals; i++)
   {
-    goal_autonomy_x = float(message_list[2*(i+1)]);
-    goal_autonomy_y = float(message_list[2*(i+1) + 1]);
+    a_g_x = float(message_list[2*(i+1)]);
+    a_g_y = float(message_list[2*(i+1) + 1]);
 
-    autonomy_goalList.add(new Goal(goal_autonomy_x, goal_autonomy_y, GOAL_RADIUS, autonomy_goal_color));
+    a_gList.add(new Goal(a_g_x, a_g_y, GOAL_RADIUS, a_g_color));
   }
-  isAutonomyGoalInitialized = true;
+  isAGInitialized = true;
 }
 
-void init_autonomy_robot(String[] message_list)
+void init_a_r(String[] message_list)
 {
   PVector ar_pos = new PVector(float(message_list[1]), float(message_list[2]));
-  autonomy_robot.setPosition(ar_pos);
-  isAutonomyRobotInitialized = true;
+  a_r.setPosition(ar_pos);
+  isARInitialized = true;
 }
 
-void init_human_goals(String[] message_list)
+void init_h_g(String[] message_list)
 {
   int num_goals = int(message_list[1]);
-  String autonomy_goal_color = "r";
-  float goal_autonomy_x, goal_autonomy_y;
+  String h_g_c = "r";
+  float h_g_x, h_g_y;
+  
+  for (int i=0; i < num_goals; i++)
+  {
+    h_g_x = float(message_list[2*(i+1)]);
+    h_g_y = float(message_list[2*(i+1) + 1]);
+
+    h_gList.add(new Goal(h_g_x, h_g_y, GOAL_RADIUS, h_g_c));
+  }
+  isHGInitialized = true;
 }
 
-void init_human_robot(String[] message_list)
+void init_h_r(String[] message_list)
 {
+  PVector hr_pos = new PVector(float(message_list[1]), float(message_list[2]));
+  h_r.setPosition(hr_pos);
+  isHRInitialized = true;
 }
 
 void instantiateRobots()
 {
-  autonomy_robot = new Robot(0.0, 0.0, ROBOT_RADIUS, AUTONOMY_ROBOT_LB, AUTONOMY_ROBOT_RB, autonomy_rob_color);
-  human_robot = new Robot(0.0, 0.0, ROBOT_RADIUS, HUMAN_ROBOT_LB, HUMAN_ROBOT_RB, human_rob_color);
+  a_r = new Robot(0.0, 0.0, ROBOT_RADIUS, A_R_LB, A_R_RB, a_r_color);
+  h_r = new Robot(0.0, 0.0, ROBOT_RADIUS, H_R_LB, H_R_RB, h_r_color);
 
-  autonomy_rob_pos = autonomy_robot.getPosition();
-  human_rob_pos = human_robot.getPosition();
+  a_r_pos = a_r.getPosition();
+  h_r_pos = h_r.getPosition();
 
-  autonomy_rob_vel = autonomy_robot.getVelocity();
-  human_rob_vel = human_robot.getVelocity();
+  a_r_vel = a_r.getVelocity();
+  h_r_vel = h_r.getVelocity();
 }
 
 void instantiateGoalLists()
 {
-  autonomy_goalList = new ArrayList<Goal>();
-  human_goalList = new ArrayList<Goal>();
+  a_gList = new ArrayList<Goal>();
+  h_gList = new ArrayList<Goal>();
   goal_color.set("Triangle", "r");
   goal_color.set("Square", "g");
 }
 
 void instantiateUDP()
 {
-  autonomy_udp = new UDP(this, AUTONOMY_HOST_PORT);
-  autonomy_udp.listen(true);
-  human_udp = new UDP(this, HUMAN_HOST_PORT);
-  human_udp.listen(true);
+  a_udp = new UDP(this, A_HOST_PORT);
+  a_udp.listen(true);
+  h_udp = new UDP(this, H_HOST_PORT);
+  h_udp.listen(true);
   key_udp = new UDP(this, KEY_HOST_PORT);
   key_udp.listen(true);  
 }

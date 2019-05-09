@@ -13,49 +13,58 @@ void receive(byte[] data, String ip, int port)
 void processMessage(String message, String ip, int port)
 {
   String[] message_list = split(message, ",");
+  //CONTROL COMMAND FOR HUMAN CONTROLLED ROBOT
   if (message_list[0].equals("HUMAN_COMMAND"))
   {
-    human_rob_vel.x = float(message_list[1]);
-    human_rob_vel.y = float(message_list[2]);
+    h_r_vel.x = float(message_list[1]);
+    h_r_vel.y = float(message_list[2]);
     if (allInitialized)
     {
-      human_robot.updatePosition(human_rob_vel);
+      h_r.updatePosition(h_r_vel);
     }
   }
+  //CONTROL COMMAND FOR AUTONOMY CONTROLLED ROBOT
   if (message_list[0].equals("AUTONOMY_COMMAND"))
   {
-    autonomy_rob_vel.x = float(message_list[1]);
-    autonomy_rob_vel.y = float(message_list[2]);
+    a_r_vel.x = float(message_list[1]);
+    a_r_vel.y = float(message_list[2]);
     if (allInitialized)
     {
-      autonomy_robot.updatePosition(autonomy_rob_vel);
+      a_r.updatePosition(a_r_vel);
     }
   }
+  
+  //AUTONOMY GOAL POSE INITIALIZATION
   if (message_list[0].equals("AUTONOMY_GOALPOS"))
   {
     int num_goals = int(message_list[1]);
     assert(message_list.length - 2 == (2*num_goals));
-    init_autonomy_goals(message_list);
-    isAutonomyGoalInitialized = true;
+    init_a_g(message_list);
+    isAGInitialized = true;
   }
+  
+  //AUTONOMY ROBOT POS INITIALIZATION
   
   if(message_list[0].equals("AUTONOMY_ROBOTPOS"))
   {
-    init_autonomy_robot(message_list);
-    isAutonomyRobotInitialized = true;
+    init_a_r(message_list);
+    isARInitialized = true;
   }
   
+  //HUMAN GOAL POSE INITIALIZATION
   if (message_list[0].equals("HUMAN_GOALPOS"))
   {
     int num_goals = int(message_list[1]);
     assert(message_list.length - 2 == (2*num_goals));
-    init_human_goals(message_list);
-    isHumanGoalInitialized = true;
+    init_h_g(message_list);
+    isHGInitialized = true;
   }
+  
+  //HUMAN ROBOT POSE INITIALIZATION
   
   if(message_list[0].equals("HUMAN_ROBOTPOS"))
   {
-    init_human_robot(message_list);
-    isHumanRobotInitialized = true;
+    init_h_r(message_list);
+    isHRInitialized = true;
   }
 }

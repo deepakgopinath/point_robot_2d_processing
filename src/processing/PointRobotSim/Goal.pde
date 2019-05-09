@@ -31,11 +31,15 @@ class Goal
     if (shape.equals("Triangle"))
     { 
       triangle(position.x, position.y, position.x+radius, position.y, position.x, position.y-radius);
+      ellipseMode(RADIUS);
+      ellipse(position.x, position.y, 5, 5);
     }
     if (shape.equals("Square"))
     {
       rectMode(RADIUS);
       square(position.x, position.y, radius);
+      ellipseMode(RADIUS);
+      ellipse(position.x, position.y, 5, 5);
     }
   }
 

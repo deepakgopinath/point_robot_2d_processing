@@ -1,10 +1,10 @@
 void displayGoals()
 {
-  for (Goal g : autonomy_goalList)
+  for (Goal g : a_gList)
   {
     g.display();
   }
-  for (Goal g : human_goalList)
+  for (Goal g : h_gList)
   {
     g.display();
   }
@@ -12,8 +12,8 @@ void displayGoals()
 
 void displayRobots()
 {
-  autonomy_robot.display();
-  human_robot.display();
+  a_r.display();
+  h_r.display();
 }
 void printText()
 {
