@@ -86,10 +86,10 @@ class PointRobotAutonomyControl(RosProcessingComm):
 
 		#GOal positions
 		rospy.loginfo("Waiting for self_goals_robot_node - point_robot_autonomy_control node ")
-		rospy.wait_for_service("/setgoalsrobot/goal_poses_list")
+		rospy.wait_for_service("/setgoalsrobot/autonomy_goal_poses_list")
 		rospy.loginfo("self_goals_robot_node found - point_robot_autonomy_control node!")
 
-		self.retrieve_goals_service = rospy.ServiceProxy("/setgoalsrobot/goal_poses_list", GoalPoses)
+		self.retrieve_goals_service = rospy.ServiceProxy("/setgoalsrobot/autonomy_goal_poses_list", GoalPoses)
 
 		rospy.Service('/point_robot_autonomy_control/trigger_trial', SetBool, self.trigger_trial)
 
@@ -151,7 +151,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 					rospy.logwarn("Sending data took longer than the specified period")
 
 	def createMessageString(self, av):
-		msg_str = "AUTONOMY_COMMAND"
+		msg_str = "A_COMMAND"
 		for i in range(self.dim):
 			msg_str += ","
 			msg_str += str(av.velocity.data[i])
@@ -162,7 +162,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		msg_str = self.recvStrFromProcessing()
 		if msg_str != "none":
 			msg_str = msg_str.split(',')
-			if msg_str[0] == "ROBOT_POSE":
+			if msg_str[0] == "A_R_POSE":
 				self.autonomy_robot_pose[0] = float(msg_str[1])
 				self.autonomy_robot_pose[1] = float(msg_str[2])
 				self.autonomy_robot_pose_msg.x = float(msg_str[1])

@@ -50,7 +50,10 @@ int KEY_HOST_PORT = 6002;
 ArrayList <Goal> a_gList;
 ArrayList <Goal> h_gList;
 
+HashMap<Integer, String> goal_shapes = new HashMap<Integer, String>();
+
 StringDict goal_color = new StringDict();
+
 
 //Bools 
 
@@ -64,28 +67,28 @@ boolean allInitialized = false;
 
 //General
 int TEXT_SIZE = 18;
+float delta_t = 50;
 
 
 void setup()
 {
   size(800, 600);
   frameRate(60);
-  
+  smooth();
+
   A_R_LB = 0;
   A_R_RB = width/2;
 
   H_R_LB = width/2;
   H_R_RB = width;
 
-  smooth();
-  
-  now = millis();
-  
+  setUpDicts();
   instantiateRobots();
   instantiateGoalLists();
   delay(1000);
   instantiateUDP();
   allInitialized = true;
+  now = millis();
 }
 
 
@@ -104,8 +107,7 @@ void draw()
   {
     displayRobots();
   }
-
-  if (millis () > now + 100);
+  if (millis () > now + delta_t);
   {
     sendRobotPoses();
     now = millis();

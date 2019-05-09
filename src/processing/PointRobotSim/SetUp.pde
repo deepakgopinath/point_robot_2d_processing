@@ -1,7 +1,6 @@
 void init_a_g(String[] message_list)
-{
+{ 
   int num_goals = int(message_list[1]);
-  String a_g_color = "r";
   float a_g_x, a_g_y;
 
   for (int i=0; i < num_goals; i++)
@@ -9,7 +8,7 @@ void init_a_g(String[] message_list)
     a_g_x = float(message_list[2*(i+1)]);
     a_g_y = float(message_list[2*(i+1) + 1]);
 
-    a_gList.add(new Goal(a_g_x, a_g_y, GOAL_RADIUS, a_g_color));
+    a_gList.add(new Goal(a_g_x, a_g_y, GOAL_RADIUS, goal_shapes.get(i)));
   }
   isAGInitialized = true;
 }
@@ -21,25 +20,26 @@ void init_a_r(String[] message_list)
   isARInitialized = true;
 }
 
+//Human
+
 void init_h_g(String[] message_list)
 {
   int num_goals = int(message_list[1]);
-  String h_g_c = "r";
   float h_g_x, h_g_y;
-  
+
   for (int i=0; i < num_goals; i++)
   {
     h_g_x = float(message_list[2*(i+1)]);
     h_g_y = float(message_list[2*(i+1) + 1]);
 
-    h_gList.add(new Goal(h_g_x, h_g_y, GOAL_RADIUS, h_g_c));
+    h_gList.add(new Goal(h_g_x, h_g_y, GOAL_RADIUS, goal_shapes.get(i)));
   }
   isHGInitialized = true;
 }
 
 void init_h_r(String[] message_list)
 {
-  PVector hr_pos = new PVector(float(message_list[1]), float(message_list[2]));
+  PVector hr_pos = new PVector(float(message_list[1]) + width/2.0, float(message_list[2]));
   h_r.setPosition(hr_pos);
   isHRInitialized = true;
 }
@@ -60,8 +60,6 @@ void instantiateGoalLists()
 {
   a_gList = new ArrayList<Goal>();
   h_gList = new ArrayList<Goal>();
-  goal_color.set("Triangle", "r");
-  goal_color.set("Square", "g");
 }
 
 void instantiateUDP()
@@ -71,5 +69,14 @@ void instantiateUDP()
   h_udp = new UDP(this, H_HOST_PORT);
   h_udp.listen(true);
   key_udp = new UDP(this, KEY_HOST_PORT);
-  key_udp.listen(true);  
+  key_udp.listen(true);
+}
+
+void setUpDicts()
+{
+  goal_color.set("Triangle", "r");
+  goal_color.set("Square", "g");
+
+  goal_shapes.put(0, "Triangle");
+  goal_shapes.put(1, "Square");
 }

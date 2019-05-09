@@ -69,14 +69,14 @@ class PointRobotHumanControl(RosProcessingComm):
 		self.data.header.frame_id = 'human_control'
 
 
-		rospy.loginfo("Waiting for self_goals_robot_node - point_robot_human_control node ")
-		rospy.wait_for_service("/setgoalsrobot/goal_poses_list")
-		rospy.loginfo("self_goals_robot_node found - point_robot_human_control node!")
+		rospy.loginfo("Waiting for human_goals_position_node - point_robot_human_control node ")
+		rospy.wait_for_service("/setgoalsrobot/human_goal_poses_list")
+		rospy.loginfo("human_goals_position_node found - point_robot_human_control node!")
 
-		self.self_goals_robot_service = rospy.ServiceProxy("/setgoalsrobot/goal_poses_list", GoalPoses)
+		self.human_goals_position_service = rospy.ServiceProxy("/setgoalsrobot/human_goal_poses_list", GoalPoses)
 
 		self.gp_req = GoalPosesRequest()
-		goal_poses_response = self.self_goals_robot_service(self.gp_req)
+		goal_poses_response = self.human_goals_position_service(self.gp_req)
 		self.num_goals = len(goal_poses_response.goal_poses)
 		assert(self.num_goals > 0)
 
@@ -104,8 +104,7 @@ class PointRobotHumanControl(RosProcessingComm):
 			self.human_control_pub.publish(data)
 			msg_str = self.createMessageString(self.user_vel)
 			self.sendStrToProcessing(msg_str)
-
-
+			
 			end = rospy.get_rostime()
 
 			if end - start < period:
@@ -114,7 +113,7 @@ class PointRobotHumanControl(RosProcessingComm):
 				rospy.logwarn("Sending data took longer than the specified period")
 
 	def createMessageString(self, uv):
-		msg_str = "HUMAN_COMMAND"
+		msg_str = "H_COMMAND"
 		for i in range(self.dim):
 			msg_str += ","
 			msg_str += str(uv.velocity.data[i])
