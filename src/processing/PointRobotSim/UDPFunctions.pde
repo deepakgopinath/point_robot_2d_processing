@@ -31,17 +31,31 @@ void processMessage(String message, String ip, int port)
       autonomy_robot.updatePosition(autonomy_rob_vel);
     }
   }
-  if (message_list[0].equals("GOALPOS"))
+  if (message_list[0].equals("AUTONOMY_GOALPOS"))
   {
     int num_goals = int(message_list[1]);
     assert(message_list.length - 2 == (2*num_goals));
-    init_goals(message_list);
-    isGoalInitialized = true;
+    init_autonomy_goals(message_list);
+    isAutonomyGoalInitialized = true;
   }
   
-  if(message_list[0].equals("ROBOTPOS"))
+  if(message_list[0].equals("AUTONOMY_ROBOTPOS"))
   {
-    init_robot(message_list);
-    isRobotInitialized = true;
+    init_autonomy_robot(message_list);
+    isAutonomyRobotInitialized = true;
+  }
+  
+  if (message_list[0].equals("HUMAN_GOALPOS"))
+  {
+    int num_goals = int(message_list[1]);
+    assert(message_list.length - 2 == (2*num_goals));
+    init_human_goals(message_list);
+    isHumanGoalInitialized = true;
+  }
+  
+  if(message_list[0].equals("HUMAN_ROBOTPOS"))
+  {
+    init_human_robot(message_list);
+    isHumanRobotInitialized = true;
   }
 }
