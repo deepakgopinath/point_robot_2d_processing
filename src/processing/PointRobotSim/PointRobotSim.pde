@@ -98,6 +98,14 @@ void draw()
   background(0);
   strokeWeight(2);
   stroke(255);
+  if (millis () > now + delta_t);
+  {
+    print("Now ", now);
+    print(" MIllis", millis());
+    println(" Delta", millis()-now);
+    sendRobotPoses();
+    now = millis();
+  }
   line(width/2.0, 0, width/2.0, height);
   printText();
   if (isAGInitialized && isHGInitialized)
@@ -107,14 +115,5 @@ void draw()
   if (isARInitialized && isHRInitialized)
   {
     displayRobots();
-  }
-  
-  if (millis () > now + delta_t);
-  {
-    print("Now ", now);
-    print(" MIllis", millis());
-    println(" Delta", millis()-now);
-    sendRobotPoses();
-    now = millis();
   }
 }

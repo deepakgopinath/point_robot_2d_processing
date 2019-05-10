@@ -53,7 +53,8 @@ class SetGoalsRobot(RosProcessingComm):
 		rospy.Service("setgoalsrobot/send_autonomy_robot_pose_to_processing", Trigger, self.send_autonomy_robot_pose_to_processing)
 		rospy.Service("setgoalsrobot/send_human_goals_to_processing", Trigger, self.send_human_goals_to_processing)
 		rospy.Service("setgoalsrobot/send_human_robot_pose_to_processing", Trigger, self.send_human_robot_pose_to_processing)
-		rospy.Service("setgoalsrobot/reset_goals", Trigger, self.reset_goals)
+		rospy.Service("setgoalsrobot/reset_autonomy_goals", Trigger, self.reset_autonomy_goals)
+		rospy.Service("setgoalsrobot/reset_human_goals", Trigger, self.reset_human_goals)
 
 
 	#autonomy robot pose and autonomy goals poses
@@ -108,14 +109,31 @@ class SetGoalsRobot(RosProcessingComm):
 		goal_poses_response.status = True
 		return goal_poses_response
 
-	def reset_goals(self, req):
+	def reset_autonomy_goals(self, req):
 		status = TriggerResponse()
-		self.createNewGoalPositions()
+		self.createNewAutonomyGoalPositions()
 		status.success = True
 		return status
 
-	def createNewGoalPositions(self):
-		pass
+	def reset_human_goals(self, req):
+		status = TriggerResponse()
+		self.createNewHumanGoalPositions()
+		status.success = True
+		return status
+
+	def createNewAutonomyGoalPositions(self):
+		if self.num_goals == 2:
+			self.autonomy_goal_positions[0][0] = 0.0 + np.random.random()*self.width/2.0
+			self.autonomy_goal_positions[0][1] = 0.0 + np.random.random()*self.height
+			self.autonomy_goal_positions[1][0] = 0.0 + np.random.random()*self.width/2.0
+			self.autonomy_goal_positions[1][1] = 0.0 + np.random.random()*self.height
+
+	def createNewHumanGoalPositions(self):
+		if self.num_goals == 2:
+			self.human_goal_positions[0][0] = 0.0 + np.random.random()*self.width/2.0 + self.width/2.0
+			self.human_goal_positions[0][1] = 0.0 + np.random.random()*self.height
+			self.human_goal_positions[1][0] = 0.0 + np.random.random()*self.width/2.0 + self.width/2.0
+			self.human_goal_positions[1][1] = 0.0 + np.random.random()*self.height
 
 
 	def init_autonomy_robot_position(self):

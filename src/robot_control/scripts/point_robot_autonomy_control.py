@@ -162,6 +162,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		msg_str = self.recvStrFromProcessing()
 		if msg_str != "none":
 			msg_str = msg_str.split(',')
+			# print msg_str
 			if msg_str[0] == "A_R_POSE":
 				self.autonomy_robot_pose[0] = float(msg_str[1])
 				self.autonomy_robot_pose[1] = float(msg_str[2])

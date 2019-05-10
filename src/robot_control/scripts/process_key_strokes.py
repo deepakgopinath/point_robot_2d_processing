@@ -21,7 +21,8 @@ class ProcessKeyStrokes(RosProcessingComm):
         rospy.loginfo("Waiting for set_goals_robot_node - process_key_strokes node ")
         rospy.wait_for_service("/setgoalsrobot/send_autonomy_goals_to_processing")
         rospy.wait_for_service("/setgoalsrobot/send_human_goals_to_processing")
-        rospy.wait_for_service("/setgoalsrobot/reset_goals")
+        rospy.wait_for_service("/setgoalsrobot/reset_autonomy_goals")
+        rospy.wait_for_service("/setgoalsrobot/reset_human_goals")
         rospy.loginfo("set_goals_robot_node found - process_key_strokes node!")
 
         rospy.loginfo("Waiting for point_robot_autonomy_control - process_key_strokes node ")
@@ -33,7 +34,8 @@ class ProcessKeyStrokes(RosProcessingComm):
         self.send_human_goals_to_processing_service = rospy.ServiceProxy('/setgoalsrobot/send_human_goals_to_processing', Trigger)
         self.send_autonomy_robot_pose_to_processing_service = rospy.ServiceProxy('/setgoalsrobot/send_autonomy_robot_pose_to_processing', Trigger)
         self.send_human_robot_pose_to_processing_service = rospy.ServiceProxy('/setgoalsrobot/send_human_robot_pose_to_processing', Trigger)
-        self.reset_goals = rospy.ServiceProxy('/setgoalsrobot/reset_goals', Trigger)
+        self.reset_autonomy_goals = rospy.ServiceProxy('/setgoalsrobot/reset_autonomy_goals', Trigger)
+        self.reset_human_goals = rospy.ServiceProxy('/setgoalsrobot/reset_human_goals', Trigger)
         self.autonomy_node_trigger_trial = rospy.ServiceProxy('/point_robot_autonomy_control/trigger_trial', SetBool)
 
     def step(self):
@@ -45,8 +47,10 @@ class ProcessKeyStrokes(RosProcessingComm):
                 self.send_autonomy_goals_to_processing_service()
                 self.send_human_goals_to_processing_service()
             elif msg_str[0] == 'GOALS_RESET':
-                self.reset_goals()
+                self.reset_autonomy_goals()
+                self.reset_human_goals()
                 self.send_autonomy_goals_to_processing_service()
+                self.send_human_goals_to_processing_service()
             elif msg_str[0] == 'BEGIN_TRIAL':
                 trigger_msg = SetBoolRequest()
                 trigger_msg.data = True
