@@ -31,7 +31,7 @@ class Goal
     stroke(0);
     if (shape.equals("Triangle"))
     { 
-      triangle(position.x, position.y, position.x+3*radius, position.y, position.x, position.y-3*radius);
+      triangle(position.x-1.5*radius, position.y, position.x+1.5*radius, position.y, position.x, position.y-1.5*sqrt(3)*radius);
     }
     if (shape.equals("Square"))
     {

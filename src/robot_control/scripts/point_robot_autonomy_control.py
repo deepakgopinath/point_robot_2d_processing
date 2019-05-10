@@ -24,8 +24,8 @@ import threading
 npa=np.array
 
 class PointRobotAutonomyControl(RosProcessingComm):
-	def __init__(self, intended_goal_index = 0, dim=2, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port = 6000):
-		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)
+	def __init__(self, intended_goal_index = 0, dim=2, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port = 6000, buffer_size=4096):
+		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port, buffer_size=buffer_size)
 		print "In constructor"
 
 		if rospy.has_param('framerate'):

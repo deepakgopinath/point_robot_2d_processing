@@ -67,7 +67,7 @@ boolean allInitialized = false;
 
 //General
 int TEXT_SIZE = 18;
-float delta_t = 50;
+float delta_t = 15;
 
 
 void setup()
@@ -87,6 +87,7 @@ void setup()
   instantiateGoalLists();
   delay(1000);
   instantiateUDP();
+  //thread("sendRobotPoses");
   allInitialized = true;
   now = millis();
 }
@@ -107,8 +108,12 @@ void draw()
   {
     displayRobots();
   }
+  
   if (millis () > now + delta_t);
   {
+    print("Now ", now);
+    print(" MIllis", millis());
+    println(" Delta", millis()-now);
     sendRobotPoses();
     now = millis();
   }

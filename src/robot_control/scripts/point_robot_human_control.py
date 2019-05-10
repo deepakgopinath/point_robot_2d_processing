@@ -20,8 +20,8 @@ import threading
 npa = np.array
 
 class PointRobotHumanControl(RosProcessingComm):
-	def __init__(self, dim=2, udp_ip='127.0.0.1', udp_recv_port=8025, udp_send_port=6001):
-		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)
+	def __init__(self, dim=2, udp_ip='127.0.0.1', udp_recv_port=8025, udp_send_port=6001, buffer_size=4096):
+		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port, buffer_size=buffer_size)
 		if rospy.has_param('framerate'):
 			self.frame_rate = rospy.get_param('framerate')
 		else:
@@ -104,7 +104,7 @@ class PointRobotHumanControl(RosProcessingComm):
 			self.human_control_pub.publish(data)
 			msg_str = self.createMessageString(self.user_vel)
 			self.sendStrToProcessing(msg_str)
-			
+
 			end = rospy.get_rostime()
 
 			if end - start < period:
