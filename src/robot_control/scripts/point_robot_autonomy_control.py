@@ -46,8 +46,12 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.dim = dim
 		self.running = True
 		self.runningCV = threading.Condition()
+		self.num_goals = 2
+		assert(self.num_goals > 0)
 		self.intended_goal_index = intended_goal_index
-
+		assert(self.intended_goal_index < self.num_goals)
+		self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+		
 		self.autonomy_control_pub = None
 		self.autonomy_robot_pose_pub = None
 		self.initializePublishers()
@@ -84,24 +88,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.data.header.stamp = rospy.Time.now()
 		self.data.header.frame_id = 'autonomy_control'
 
-		#GOal positions
-		rospy.loginfo("Waiting for self_goals_robot_node - point_robot_autonomy_control node ")
-		rospy.wait_for_service("/setgoalsrobot/autonomy_goal_poses_list")
-		rospy.loginfo("self_goals_robot_node found - point_robot_autonomy_control node!")
-
-		self.retrieve_goals_service = rospy.ServiceProxy("/setgoalsrobot/autonomy_goal_poses_list", GoalPoses)
-
-		rospy.Service('/point_robot_autonomy_control/trigger_trial', SetBool, self.trigger_trial)
-
-		self.gp_req = GoalPosesRequest()
-		goal_poses_response = self.retrieve_goals_service(self.gp_req)
-		self.num_goals = len(goal_poses_response.goal_poses)
-		assert(self.num_goals > 0)
-
-		self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
-		for i in range(self.num_goals):
-			self.goal_positions[i][0] = goal_poses_response.goal_poses[i].x
-			self.goal_positions[i][1] = goal_poses_response.goal_poses[i].y
+		rospy.Service("point_robot_autonomy_control/set_autonomy_goals", GoalPoses, self.set_autonomy_goals)
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()
@@ -113,6 +100,22 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.random_direction = config["random_direction"]
 		print self.signal_sparsity, self.random_direction
 		return config
+
+	def set_autonomy_goals(self, req):
+		status = GoalPosesResponse()
+		try:
+			self.num_goals = len(req.goal_poses)
+			assert(self.num_goals > 0)
+			self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+			for i in range(self.num_goals):
+				self.goal_positions[i][0] = req.goal_poses[i].x
+				self.goal_positions[i][1] = req.goal_poses[i].y
+
+			print('AUTONOMY_GOALS', self.goal_positions)
+		except:
+			import IPython; IPython.embed(banner1='error in set_autonomy_goals service')
+		status.success = True
+		return status
 
 	def trigger_trial(self, req):
 		status = SetBoolResponse()
@@ -170,12 +173,13 @@ class PointRobotAutonomyControl(RosProcessingComm):
 				self.autonomy_robot_pose_msg.y = float(msg_str[2])
 
 	def step(self):
-		self.getRobotPosition()
-		for i in range(self.dim):
-			self.autonomy_vel.velocity.data[i] = 0.0
+		if self.is_trial_on:
+			self.getRobotPosition()
+			for i in range(self.dim):
+				self.autonomy_vel.velocity.data[i] = 0.0
 
-		for i in range(self.dim):
-			self.autonomy_vel.velocity.data[i] = self.velocity_scale*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
+			for i in range(self.dim):
+				self.autonomy_vel.velocity.data[i] = self.velocity_scale*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
 
 	def spin(self):
 		rospy.loginfo("RUNNING")

@@ -6,8 +6,8 @@ from std_srvs.srv import SetBool, SetBoolRequest, SetBoolResponse
 import threading
 
 class ProcessKeyStrokes(RosProcessingComm):
-    def __init__(self, udp_ip="127.0.0.1", udp_recv_port=8026, udp_send_port = 6000):
-        RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)
+    def __init__(self, udp_ip="127.0.0.1", udp_recv_port=8027, udp_send_port = 6002, buffer_size=4096):
+        RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port, buffer_size=buffer_size)
         if rospy.has_param('framerate'):
             self.frame_rate = rospy.get_param('framerate')
         else:
@@ -40,6 +40,7 @@ class ProcessKeyStrokes(RosProcessingComm):
 
     def step(self):
         msg_str = self.recvStrFromProcessing()
+        print(msg_str)
         if msg_str != "none":
             msg_str = msg_str.split(',')
             print msg_str
@@ -60,6 +61,7 @@ class ProcessKeyStrokes(RosProcessingComm):
                 trigger_msg.data = False
                 self.autonomy_node_trigger_trial(trigger_msg)
             elif msg_str[0] == 'ROBOT_READY':
+                print("ROBOT READY HERE")
                 self.send_autonomy_robot_pose_to_processing_service()
                 self.send_human_robot_pose_to_processing_service()
 

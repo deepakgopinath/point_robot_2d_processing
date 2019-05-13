@@ -37,12 +37,12 @@ int A_HOST_PORT = 6000;
 
 UDP h_udp;
 String H_DEST_IP = "127.0.0.1";
-int H_DEST_PORT = 8025;
+int H_DEST_PORT = 8026;
 int H_HOST_PORT = 6001;
 
 UDP key_udp;
 String KEY_DEST_IP = "127.0.0.1";
-int KEY_DEST_PORT = 8026;
+int KEY_DEST_PORT = 8027;
 int KEY_HOST_PORT = 6002;
 
 //Goals
@@ -67,7 +67,7 @@ boolean allInitialized = false;
 
 //General
 int TEXT_SIZE = 18;
-float delta_t = 15;
+float delta_t = 50;
 
 
 void setup()
@@ -100,9 +100,6 @@ void draw()
   stroke(255);
   if (millis () > now + delta_t);
   {
-    print("Now ", now);
-    print(" MIllis", millis());
-    println(" Delta", millis()-now);
     sendRobotPoses();
     now = millis();
   }

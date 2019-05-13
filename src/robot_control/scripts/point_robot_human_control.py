@@ -20,7 +20,7 @@ import threading
 npa = np.array
 
 class PointRobotHumanControl(RosProcessingComm):
-	def __init__(self, dim=2, udp_ip='127.0.0.1', udp_recv_port=8025, udp_send_port=6001, buffer_size=4096):
+	def __init__(self, dim=2, udp_ip='127.0.0.1', udp_recv_port=8026, udp_send_port=6001, buffer_size=4096):
 		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port, buffer_size=buffer_size)
 		if rospy.has_param('framerate'):
 			self.frame_rate = rospy.get_param('framerate')
@@ -32,6 +32,10 @@ class PointRobotHumanControl(RosProcessingComm):
 		rospy.Subscriber('joy', Joy, self.joyCB)
 		self.human_control_pub = rospy.Publisher('user_vel', CartVelCmd, queue_size=1)
 		self.dim = dim
+		self.num_goals = 2
+		assert(self.num_goals > 0)
+		self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+
 		if rospy.has_param('max_cart_vel'):
 			self._max_cart_vel = np.array(rospy.get_param('max_cart_vel'))
 		else:
@@ -68,22 +72,7 @@ class PointRobotHumanControl(RosProcessingComm):
 		self.data.header.stamp = rospy.Time.now()
 		self.data.header.frame_id = 'human_control'
 
-
-		rospy.loginfo("Waiting for human_goals_position_node - point_robot_human_control node ")
-		rospy.wait_for_service("/setgoalsrobot/human_goal_poses_list")
-		rospy.loginfo("human_goals_position_node found - point_robot_human_control node!")
-
-		self.human_goals_position_service = rospy.ServiceProxy("/setgoalsrobot/human_goal_poses_list", GoalPoses)
-
-		self.gp_req = GoalPosesRequest()
-		goal_poses_response = self.human_goals_position_service(self.gp_req)
-		self.num_goals = len(goal_poses_response.goal_poses)
-		assert(self.num_goals > 0)
-
-		self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
-		for i in range(self.num_goals):
-			self.goal_positions[i][0] = goal_poses_response.goal_poses[i].x + self.width/2.0 #This is specific to the way the processing sketch is setup. The human control is on the right half of the window. therefore thye width/2.0 bias
-			self.goal_positions[i][1] = goal_poses_response.goal_poses[i].y
+		rospy.Service("point_robot_human_control/set_human_goals", GoalPoses, self.set_human_goals)
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()
@@ -111,6 +100,22 @@ class PointRobotHumanControl(RosProcessingComm):
 				rospy.sleep(period - (end-start))
 			else:
 				rospy.logwarn("Sending data took longer than the specified period")
+
+	def set_human_goals(self, req):
+		status = GoalPosesResponse()
+		try:
+			self.num_goals = len(req.goal_poses)
+			assert(self.num_goals > 0)
+			self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+			for i in range(self.num_goals):
+				self.goal_positions[i][0] = req.goal_poses[i].x
+				self.goal_positions[i][1] = req.goal_poses[i].y
+
+			print('HUMAN GOALS', self.goal_positions)
+		except:
+			import IPython; IPython.embed(banner1='error in set_autonomy_goals service')
+		status.success = True
+		return status
 
 	def createMessageString(self, uv):
 		msg_str = "H_COMMAND"

@@ -47,8 +47,11 @@ class SetGoalsRobot(RosProcessingComm):
 		self.init_human_goal_positions()
 		self.init_human_robot_position()
 
-		rospy.Service("setgoalsrobot/autonomy_goal_poses_list", GoalPoses, self.autonomy_goal_poses_list)
-		rospy.Service("setgoalsrobot/human_goal_poses_list", GoalPoses, self.human_goal_poses_list)
+		
+		self.set_autonomy_goals_service = rospy.ServiceProxy('/point_robot_autonomy_control/set_autonomy_goals', GoalPoses)
+		self.set_human_goals_service = rospy.ServiceProxy('/point_robot_human_control/set_human_goals', GoalPoses)
+
+		
 		rospy.Service("setgoalsrobot/send_autonomy_goals_to_processing", Trigger, self.send_autonomy_goals_to_processing)
 		rospy.Service("setgoalsrobot/send_autonomy_robot_pose_to_processing", Trigger, self.send_autonomy_robot_pose_to_processing)
 		rospy.Service("setgoalsrobot/send_human_goals_to_processing", Trigger, self.send_human_goals_to_processing)
@@ -60,6 +63,14 @@ class SetGoalsRobot(RosProcessingComm):
 	#autonomy robot pose and autonomy goals poses
 	def send_autonomy_goals_to_processing(self, req):
 		status = TriggerResponse()
+		#send goals to autonomy_node
+		goals_req = GoalPosesRequest()
+		for i in range(self.num_goals):
+			goal_pose = Vector3()
+			goal_pose.x = self.autonomy_goal_positions[i][0]
+			goal_pose.y = self.autonomy_goal_positions[i][1]
+			goals_req.goal_poses.append(goal_pose)
+		self.set_autonomy_goals(goals_req)
 		msg_string = self.createMsgString('autonomy_goal_pose')
 		self.sendStrToProcessing(msg_string)
 		status.success = True
@@ -75,6 +86,13 @@ class SetGoalsRobot(RosProcessingComm):
 	#human robot pose and human goals poses
 	def send_human_goals_to_processing(self, req):
 		status = TriggerResponse()
+		goals_req = GoalPosesRequest()
+		for i in range(self.num_goals):
+			goal_pose = Vector3()
+			goal_pose.x = self.human_goal_positions[i][0]
+			goal_pose.y = self.human_goal_positions[i][1]
+			goals_req.goal_poses.append(goal_pose)
+		self.set_human_goals(goals_req)
 		msg_string = self.createMsgString('human_goal_pose')
 		self.sendStrToProcessing(msg_string)
 		status.success = True
@@ -86,28 +104,6 @@ class SetGoalsRobot(RosProcessingComm):
 		self.sendStrToProcessing(msg_string)
 		status.success = True
 		return status
-
-	def autonomy_goal_poses_list(self, objs):
-		goal_poses_response = GoalPosesResponse()
-		for i in range(self.num_goals):
-			goal_pose = Vector3()
-			goal_pose.x = self.autonomy_goal_positions[i][0]
-			goal_pose.y = self.autonomy_goal_positions[i][1]
-			goal_poses_response.goal_poses.append(goal_pose)
-
-		goal_poses_response.status = True
-		return goal_poses_response
-
-	def human_goal_poses_list(self, objs):
-		goal_poses_response = GoalPosesResponse()
-		for i in range(self.num_goals):
-			goal_pose = Vector3()
-			goal_pose.x = self.human_goal_positions[i][0]
-			goal_pose.y = self.human_goal_positions[i][1]
-			goal_poses_response.goal_poses.append(goal_pose)
-
-		goal_poses_response.status = True
-		return goal_poses_response
 
 	def reset_autonomy_goals(self, req):
 		status = TriggerResponse()
