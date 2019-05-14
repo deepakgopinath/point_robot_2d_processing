@@ -1,7 +1,6 @@
 void sendUDP(String message, String ip, int port, UDP udp)
 {
   //byte[] data = message.getBytes();
-  println("HERE");
   udp.send(message, ip, port);
 }
 

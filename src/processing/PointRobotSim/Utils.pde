@@ -37,6 +37,5 @@ void keyPressed()
   {
     message = "ROBOT_READY";
   }
-
   sendUDP(message, KEY_DEST_IP, KEY_DEST_PORT, key_udp);
 }

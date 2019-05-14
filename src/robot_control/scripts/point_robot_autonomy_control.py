@@ -51,7 +51,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.intended_goal_index = intended_goal_index
 		assert(self.intended_goal_index < self.num_goals)
 		self.goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
-		
+
 		self.autonomy_control_pub = None
 		self.autonomy_robot_pose_pub = None
 		self.initializePublishers()
@@ -89,9 +89,11 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.data.header.frame_id = 'autonomy_control'
 
 		rospy.Service("point_robot_autonomy_control/set_autonomy_goals", GoalPoses, self.set_autonomy_goals)
+		rospy.Service("point_robot_autonomy_control/trigger_trial", Trigger, self.trigger_trial)
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()
+		rospy.loginfo("END OF CONSTRUCTOR - point_robot_autonomy_control_node")
 
 
 	def reconfigureParams(self, level, config):

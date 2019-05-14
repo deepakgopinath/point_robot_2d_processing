@@ -11,8 +11,8 @@
 	</node>
 
 	<node pkg="robot_control" output="screen" type="set_goals_robot.py" name="set_goals_robot"/>
-	<node pkg="robot_control" output="screen" type="point_robot_human_control.py" name="point_robot_human_control" respawn="true"/>
-	<node pkg="robot_control" output="screen" type="point_robot_autonomy_control.py" name="point_robot_autonomy_control" respawn="true"/>
-	<node pkg="robot_control" output="screen" type="process_key_strokes.py" name="process_key_strokes" respawn="true"/>
+	<node pkg="robot_control" output="screen" type="point_robot_human_control.py" name="point_robot_human_control" respawn="false"/>
+	<node pkg="robot_control" output="screen" type="point_robot_autonomy_control.py" name="point_robot_autonomy_control" respawn="false"/>
+	<node pkg="robot_control" output="screen" type="process_key_strokes.py" name="process_key_strokes" respawn="false"/>
 
 </launch>

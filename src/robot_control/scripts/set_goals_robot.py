@@ -47,17 +47,19 @@ class SetGoalsRobot(RosProcessingComm):
 		self.init_human_goal_positions()
 		self.init_human_robot_position()
 
-		
+
 		self.set_autonomy_goals_service = rospy.ServiceProxy('/point_robot_autonomy_control/set_autonomy_goals', GoalPoses)
 		self.set_human_goals_service = rospy.ServiceProxy('/point_robot_human_control/set_human_goals', GoalPoses)
 
-		
+
 		rospy.Service("setgoalsrobot/send_autonomy_goals_to_processing", Trigger, self.send_autonomy_goals_to_processing)
 		rospy.Service("setgoalsrobot/send_autonomy_robot_pose_to_processing", Trigger, self.send_autonomy_robot_pose_to_processing)
 		rospy.Service("setgoalsrobot/send_human_goals_to_processing", Trigger, self.send_human_goals_to_processing)
 		rospy.Service("setgoalsrobot/send_human_robot_pose_to_processing", Trigger, self.send_human_robot_pose_to_processing)
 		rospy.Service("setgoalsrobot/reset_autonomy_goals", Trigger, self.reset_autonomy_goals)
 		rospy.Service("setgoalsrobot/reset_human_goals", Trigger, self.reset_human_goals)
+
+		rospy.loginfo("END OF CONSTRUCTOR - set_goals_robot_node")
 
 
 	#autonomy robot pose and autonomy goals poses

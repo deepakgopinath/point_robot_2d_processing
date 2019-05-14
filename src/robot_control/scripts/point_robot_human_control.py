@@ -76,6 +76,7 @@ class PointRobotHumanControl(RosProcessingComm):
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()
+		rospy.loginfo("END OF CONSTRUCTOR - point_robot_human_control_node")
 
 	def _publish_command(self, period):
 		while not rospy.is_shutdown():

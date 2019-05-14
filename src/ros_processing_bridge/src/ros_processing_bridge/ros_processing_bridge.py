@@ -32,7 +32,6 @@ class RosProcessingComm(object):
 	def sendStrToProcessing(self, msg_str):
 		self.sock_send.sendto(msg_str.encode('utf-8'), (self.udp_ip, self.udp_send_port))
 
-
 	def recvStrFromProcessing(self):
 		msg_string = "none"
 		try:
