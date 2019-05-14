@@ -72,10 +72,10 @@ class SetGoalsRobot(RosProcessingComm):
 			goal_pose.x = self.autonomy_goal_positions[i][0]
 			goal_pose.y = self.autonomy_goal_positions[i][1]
 			goals_req.goal_poses.append(goal_pose)
-		self.set_autonomy_goals(goals_req)
+		status_2 = self.set_autonomy_goals_service(goals_req)
 		msg_string = self.createMsgString('autonomy_goal_pose')
 		self.sendStrToProcessing(msg_string)
-		status.success = True
+		status.success = True and status_2.success
 		return status
 
 	def send_autonomy_robot_pose_to_processing(self, req):
@@ -94,10 +94,10 @@ class SetGoalsRobot(RosProcessingComm):
 			goal_pose.x = self.human_goal_positions[i][0]
 			goal_pose.y = self.human_goal_positions[i][1]
 			goals_req.goal_poses.append(goal_pose)
-		self.set_human_goals(goals_req)
+		status_2 = self.set_human_goals_service(goals_req)
 		msg_string = self.createMsgString('human_goal_pose')
 		self.sendStrToProcessing(msg_string)
-		status.success = True
+		status.success = True and status_2.success
 		return status
 
 	def send_human_robot_pose_to_processing(self, req):

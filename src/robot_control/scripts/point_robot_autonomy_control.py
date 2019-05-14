@@ -24,7 +24,7 @@ import threading
 npa=np.array
 
 class PointRobotAutonomyControl(RosProcessingComm):
-	def __init__(self, intended_goal_index = 0, dim=2, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port = 6000, buffer_size=4096):
+	def __init__(self, intended_goal_index = 0, dim=2, udp_ip="127.0.0.1", udp_recv_port=8025, udp_send_port = 6000, buffer_size=8192*4):
 		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port, buffer_size=buffer_size)
 		print "In constructor"
 
@@ -89,7 +89,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.data.header.frame_id = 'autonomy_control'
 
 		rospy.Service("point_robot_autonomy_control/set_autonomy_goals", GoalPoses, self.set_autonomy_goals)
-		rospy.Service("point_robot_autonomy_control/trigger_trial", Trigger, self.trigger_trial)
+		rospy.Service("point_robot_autonomy_control/trigger_trial", SetBool, self.trigger_trial)
 
 		self.send_thread = threading.Thread(target=self._publish_command, args=(self.period,))
 		self.send_thread.start()
@@ -167,7 +167,6 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		msg_str = self.recvStrFromProcessing()
 		if msg_str != "none":
 			msg_str = msg_str.split(',')
-			# print msg_str
 			if msg_str[0] == "A_R_POSE":
 				self.autonomy_robot_pose[0] = float(msg_str[1])
 				self.autonomy_robot_pose[1] = float(msg_str[2])
@@ -175,13 +174,12 @@ class PointRobotAutonomyControl(RosProcessingComm):
 				self.autonomy_robot_pose_msg.y = float(msg_str[2])
 
 	def step(self):
-		if self.is_trial_on:
-			self.getRobotPosition()
-			for i in range(self.dim):
-				self.autonomy_vel.velocity.data[i] = 0.0
+		self.getRobotPosition()
+		for i in range(self.dim):
+			self.autonomy_vel.velocity.data[i] = 0.0
 
-			for i in range(self.dim):
-				self.autonomy_vel.velocity.data[i] = self.velocity_scale*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
+		for i in range(self.dim):
+			self.autonomy_vel.velocity.data[i] = self.velocity_scale*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
 
 	def spin(self):
 		rospy.loginfo("RUNNING")

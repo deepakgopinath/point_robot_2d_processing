@@ -67,7 +67,7 @@ boolean allInitialized = false;
 
 //General
 int TEXT_SIZE = 18;
-float delta_t = 50;
+float delta_t = 100;
 
 
 void setup()

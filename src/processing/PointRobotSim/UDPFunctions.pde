@@ -47,7 +47,6 @@ void processMessage(String message, String ip, int port)
 
   if (message_list[0].equals("AUTONOMY_ROBOTPOS"))
   {  
-    println("HERE");
     init_a_r(message_list);
     isARInitialized = true;
   }

@@ -37,6 +37,7 @@ class ProcessKeyStrokes(RosProcessingComm):
         self.reset_autonomy_goals = rospy.ServiceProxy('/setgoalsrobot/reset_autonomy_goals', Trigger)
         self.reset_human_goals = rospy.ServiceProxy('/setgoalsrobot/reset_human_goals', Trigger)
         self.autonomy_node_trigger_trial = rospy.ServiceProxy('/point_robot_autonomy_control/trigger_trial', SetBool)
+        
         rospy.loginfo("END OF CONSTRUCTOR - process_key_strokes_node")
 
     def step(self):
