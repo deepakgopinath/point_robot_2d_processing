@@ -7,9 +7,9 @@ void sendRobotPoses()
     String a_r_pos_message = "A_R_POSE," + str(a_r_pos.x) + "," + str(a_r_pos.y);
     sendUDP(a_r_pos_message, A_DEST_IP, A_DEST_PORT, a_udp);
 
-    //h_r_pos = h_r.getPosition();
-    //String h_r_pos_message = "H_R_POSE," + str(h_r_pos.x) + "," + str(h_r_pos.y);
-    //sendUDP(h_r_pos_message, H_DEST_IP, H_DEST_PORT, h_udp);
+    h_r_pos = h_r.getPosition();
+    String h_r_pos_message = "H_R_POSE," + str(h_r_pos.x) + "," + str(h_r_pos.y);
+    sendUDP(h_r_pos_message, H_DEST_IP, H_DEST_PORT, h_udp);
   }
 }
 

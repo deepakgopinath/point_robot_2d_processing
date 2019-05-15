@@ -74,7 +74,7 @@ void setup()
 {
   size(800, 600);
   frameRate(60);
-  smooth();
+  //smooth();
 
   A_R_LB = 0;
   A_R_RB = width/2;
