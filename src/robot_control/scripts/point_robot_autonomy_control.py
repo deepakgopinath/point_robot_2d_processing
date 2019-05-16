@@ -39,6 +39,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.signal_sparsity = 0.0
 		self.random_direction = 0.0
 
+
 		self.is_trial_on = False
 		self.period = rospy.Duration(1.0/self.frame_rate)
 		self.lock = threading.Lock()
@@ -197,8 +198,20 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		for i in range(self.dim):
 			self.autonomy_vel.velocity.data[i] = 0.0
 
+		#compute base velocity
 		for i in range(self.dim):
 			self.autonomy_vel.velocity.data[i] = self.velocity_scale*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
+
+		rand = np.random.random()
+		if self.random_direction > 0.0:
+			#TODO add gaussian noise to velocity
+			pass
+		
+		if rand < self.signal_sparsity:
+			for i in range(self.dim):
+				self.autonomy_vel.velocity.data[i] = 0.0
+
+
 
 	def spin(self):
 		rospy.loginfo("RUNNING")
