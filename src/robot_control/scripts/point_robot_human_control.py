@@ -76,6 +76,10 @@ class PointRobotHumanControl(RosProcessingComm):
 		self.human_robot_pose_msg = Point()
 		self.getRobotPosition()
 
+		self.human_goal_pose = Float32MultiArray()
+		self.human_goal_pose.data = [list(x) for x in list(self.goal_positions)]
+		self.human_goal_pose_pub.publish(self.human_goal_pose)
+
 		self.data = CartVelCmd()
 		self._msg_dim = [MultiArrayDimension()]
 		self._msg_dim[0].label = 'cartesian_velocity'
@@ -95,6 +99,7 @@ class PointRobotHumanControl(RosProcessingComm):
 	def initializePublishers(self):
 		self.human_control_pub = rospy.Publisher('user_vel', CartVelCmd, queue_size=1)
 		self.human_robot_pose_pub = rospy.Publisher('human_robot_pose', Point, queue_size=1)
+		self.human_goal_pose_pub = rospy.Publisher('human_goal_pose', Float32MultiArray, queue_size=1)
 
 
 	def _publish_command(self, period):
@@ -132,7 +137,9 @@ class PointRobotHumanControl(RosProcessingComm):
 				self.goal_positions[i][0] = req.goal_poses[i].x
 				self.goal_positions[i][1] = req.goal_poses[i].y
 
-			print('HUMAN GOALS', self.goal_positions)
+			# print('HUMAN GOALS', self.goal_positions)
+			self.human_goal_pose.data = [list(x) for x in list(self.goal_positions)]
+			self.human_goal_pose_pub.publish(self.human_goal_pose)
 		except:
 			import IPython; IPython.embed(banner1='error in set_autonomy_goals service')
 		status.success = True

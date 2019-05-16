@@ -4,7 +4,7 @@ from ros_processing_bridge.ros_processing_bridge import RosProcessingComm
 from sensor_msgs.msg import Joy
 
 from std_msgs.msg import Float32MultiArray
-from std_msgs.msg import MultiArrayDimension
+from std_msgs.msg import MultiArrayDimension, MultiArrayLayout
 from std_msgs.msg import Header
 from std_msgs.msg import String
 from robot_control.srv import GoalPoses, GoalPosesResponse, GoalPosesRequest
@@ -54,6 +54,8 @@ class PointRobotAutonomyControl(RosProcessingComm):
 
 		self.autonomy_control_pub = None
 		self.autonomy_robot_pose_pub = None
+		self.autonomy_goal_pose_pub = None
+
 		self.initializePublishers()
 		if rospy.has_param('max_cart_vel'):
 			self._max_cart_vel = np.array(rospy.get_param('max_cart_vel'))
@@ -77,6 +79,19 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.autonomy_robot_pose = np.zeros(self.dim)
 		self.autonomy_robot_pose_msg = Point()
 		self.getRobotPosition()
+
+		self.autonomy_goal_pose_msg = Float32MultiArray()
+		_dim = [MultiArrayDimension()]*2
+		_dim[0].label = 'Goal Number'
+		_dim[0].size = self.num_goals
+		_dim[0].stride = self.num_goals*self.dim
+		_dim[1].label = 'Dimension'
+		_dim[1].size = self.dim
+		_dim[1].stride = self.dim
+		self.autonomy_goal_pose_msg.layout.dim = _dim
+		self.autonomy_goal_pose_msg.data = [list(x) for x in list(self.goal_positions)]
+		self.autonomy_goal_pose_pub.publish(self.autonomy_goal_pose_msg)
+		import IPython; IPython.embed(banner1 = 'check publisher')
 
 		self.data = CartVelCmd()
 		self._msg_dim = [MultiArrayDimension()]
@@ -113,7 +128,10 @@ class PointRobotAutonomyControl(RosProcessingComm):
 				self.goal_positions[i][0] = req.goal_poses[i].x
 				self.goal_positions[i][1] = req.goal_poses[i].y
 
-			print('AUTONOMY_GOALS', self.goal_positions)
+			# print('AUTONOMY_GOALS', self.goal_positions)
+			import IPython; IPython.embed(banner1= 'check pub')
+			self.autonomy_goal_pose_msg.data = [list(x) for x in list(self.goal_positions)]
+			self.autonomy_goal_pose_pub.publish(self.autonomy_goal_pose_msg)
 		except:
 			import IPython; IPython.embed(banner1='error in set_autonomy_goals service')
 		status.success = True
@@ -128,6 +146,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 	def initializePublishers(self):
 		self.autonomy_control_pub = rospy.Publisher('autonomy_vel', CartVelCmd, queue_size=1)
 		self.autonomy_robot_pose_pub = rospy.Publisher('autonomy_robot_pose', Point, queue_size=1)
+		self.autonomy_goal_pose_pub = rospy.Publisher('autonomy_goal_pose',Float32MultiArray,queue_size=1)
 
 	def _publish_command(self, period):
 		while not rospy.is_shutdown():

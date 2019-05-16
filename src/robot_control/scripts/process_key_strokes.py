@@ -62,7 +62,6 @@ class ProcessKeyStrokes(RosProcessingComm):
                 trigger_msg.data = False
                 self.autonomy_node_trigger_trial(trigger_msg)
             elif msg_str[0] == 'ROBOT_READY':
-                print("ROBOT READY HERE")
                 self.send_autonomy_robot_pose_to_processing_service()
                 self.send_human_robot_pose_to_processing_service()
 
