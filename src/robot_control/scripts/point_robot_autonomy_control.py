@@ -36,7 +36,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		# self.frame_rate = 60.0
 
 		# self.server = DynamicReconfigureServer(ConfigType, self.reconfigureParams)
-		self.signal_sparsity = 0.0
+		self.signal_sparsity = 0.9
 		self.random_direction = 0.0
 
 
@@ -92,7 +92,6 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.autonomy_goal_pose_msg.layout.dim = _dim
 		self.autonomy_goal_pose_msg.data = [list(x) for x in list(self.goal_positions)]
 		self.autonomy_goal_pose_pub.publish(self.autonomy_goal_pose_msg)
-		import IPython; IPython.embed(banner1 = 'check publisher')
 
 		self.data = CartVelCmd()
 		self._msg_dim = [MultiArrayDimension()]
@@ -130,7 +129,6 @@ class PointRobotAutonomyControl(RosProcessingComm):
 				self.goal_positions[i][1] = req.goal_poses[i].y
 
 			# print('AUTONOMY_GOALS', self.goal_positions)
-			import IPython; IPython.embed(banner1= 'check pub')
 			self.autonomy_goal_pose_msg.data = [list(x) for x in list(self.goal_positions)]
 			self.autonomy_goal_pose_pub.publish(self.autonomy_goal_pose_msg)
 		except:
@@ -206,12 +204,10 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		if self.random_direction > 0.0:
 			#TODO add gaussian noise to velocity
 			pass
-		
+
 		if rand < self.signal_sparsity:
 			for i in range(self.dim):
 				self.autonomy_vel.velocity.data[i] = 0.0
-
-
 
 	def spin(self):
 		rospy.loginfo("RUNNING")

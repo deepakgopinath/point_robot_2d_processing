@@ -2,6 +2,7 @@ void init_a_g(String[] message_list)
 { 
   int num_goals = int(message_list[1]);
   float a_g_x, a_g_y;
+  isAGInitialized = false;
   a_gList.clear();
   for (int i=0; i < num_goals; i++)
   {
@@ -26,6 +27,7 @@ void init_h_g(String[] message_list)
 {
   int num_goals = int(message_list[1]);
   float h_g_x, h_g_y;
+  isHGInitialized = false;
   h_gList.clear();
   for (int i=0; i < num_goals; i++)
   {
