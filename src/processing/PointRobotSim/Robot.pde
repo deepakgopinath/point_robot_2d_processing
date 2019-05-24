@@ -37,6 +37,11 @@ class Robot {
     stroke(0);
     ellipseMode(RADIUS);
     ellipse(position.x, position.y, radius, radius);
+    push();
+    translate(position.x, position.y);
+    stroke(255);
+    line(0, 0, 20*(velocity.x)/velocity.mag(), 20*(velocity.y)/velocity.mag());
+    pop();
   }
 
   //getters
