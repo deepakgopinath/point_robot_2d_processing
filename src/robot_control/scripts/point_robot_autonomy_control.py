@@ -49,8 +49,9 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.num_goals = 2
 		self.goal_threshold = 10
 
-		self.signal_sparsity = 0.6
-		self.random_direction = 0.8
+		self.signal_sparsity = 0.0
+		self.random_direction = 0.9
+		self.rand_vec_scale = 1.0
 		self.mu = [0]*self.dim
 		self.cov = np.eye(self.dim)
 
@@ -206,11 +207,11 @@ class PointRobotAutonomyControl(RosProcessingComm):
 			self.autonomy_vel.velocity.data[i] = 0.0
 
 		#compute base velocity
-		if np.random.random() < 0.1:
-			if self.intended_goal_index == 0:
-				self.intended_goal_index = 1
-			else:
-				self.intended_goal_index = 0
+		# if np.random.random() < 0.1:
+		# 	if self.intended_goal_index == 0:
+		# 		self.intended_goal_index = 1
+		# 	else:
+		# 		self.intended_goal_index = 0
 
 		if np.linalg.norm(self.goal_positions[self.intended_goal_index] - self.autonomy_robot_pose) > self.goal_threshold: #generate nonzero velocity if the robot is outisde the goal threshold distance.
 			for i in range(self.dim):
@@ -222,19 +223,17 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.filter_list.append(list(self.autonomy_vel.velocity.data[:self.dim]))
 		self.autonomy_vel.velocity.data[:self.dim] = list(np.mean(self.filter_list, axis = 0))
 
+		#TODO add gaussian noise to velocity
+		rand_vector = np.random.multivariate_normal(self.mu, self.cov)
+		rand_vector = self.rand_vec_scale*rand_vector/np.linalg.norm(rand_vector)
+		self.autonomy_vel.velocity.data[:self.dim] = (1 - self.random_direction)*(self.autonomy_vel.velocity.data[:self.dim]) + (self.random_direction)*rand_vector
+
 		rand = np.random.random()
-		if self.random_direction > 0.0:
-			#TODO add gaussian noise to velocity
-			rand_vector = np.random.multivariate_normal(self.mu, self.cov)
-			rand_vector = self.random_direction*rand_vector/np.linalg.norm(rand_vector)
-			self.autonomy_vel.velocity.data[:self.dim] += rand_vector
-
-
 		if rand < self.signal_sparsity:
 			for i in range(self.dim):
 				self.autonomy_vel.velocity.data[i] = 0.0
 
-		self.intended_goal_index = 0
+		# self.intended_goal_index = 0
 
 	def spin(self):
 		rospy.loginfo("RUNNING")
