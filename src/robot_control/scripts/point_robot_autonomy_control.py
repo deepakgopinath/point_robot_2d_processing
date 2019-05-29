@@ -140,6 +140,9 @@ class PointRobotAutonomyControl(RosProcessingComm):
 			self.autonomy_goal_pose_pub.publish(self.autonomy_goal_pose_msg)
 		except:
 			import IPython; IPython.embed(banner1='error in set_autonomy_goals service')
+
+		self.intended_goal_index = np.random.choice(self.num_goals)
+		print "INTENDED GOAL INDEX ", self.intended_goal_index
 		status.success = True
 		return status
 
@@ -211,8 +214,8 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		# 		self.intended_goal_index = 0
 
 		if np.linalg.norm(self.goal_positions[self.intended_goal_index] - self.autonomy_robot_pose) > self.goal_threshold: #generate nonzero velocity if the robot is outisde the goal threshold distance.
-			for i in range(self.dim):
-				self.autonomy_vel.velocity.data[i] = self.velocity_scale*np.sign(self.goal_positions[self.intended_goal_index][i] - self.autonomy_robot_pose[i])
+			diff_vec = np.array(self.goal_positions[self.intended_goal_index] - self.autonomy_robot_pose)
+			self.autonomy_vel.velocity.data[:self.dim] = self.velocity_scale * diff_vec/np.linalg.norm(diff_vec)
 
 		#LOW PASS FILTER?
 
@@ -221,9 +224,10 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.autonomy_vel.velocity.data[:self.dim] = list(np.mean(self.filter_list, axis = 0))
 
 		#TODO add gaussian noise to velocity
-		rand_vector = np.random.multivariate_normal(self.mu, self.cov)
-		rand_vector = self.rand_vec_scale*rand_vector/np.linalg.norm(rand_vector)
-		self.autonomy_vel.velocity.data[:self.dim] = (1 - self.random_direction)*(self.autonomy_vel.velocity.data[:self.dim]) + (self.random_direction)*rand_vector
+		if self.random_direction > 0.0:
+			rand_vector = np.random.multivariate_normal(self.mu, self.cov)
+			rand_vector = self.rand_vec_scale*rand_vector/np.linalg.norm(rand_vector)
+			self.autonomy_vel.velocity.data[:self.dim] = (1 - self.random_direction)*(self.autonomy_vel.velocity.data[:self.dim]) + (self.random_direction)*rand_vector
 
 		rand = np.random.random()
 		if rand < self.signal_sparsity:
