@@ -35,10 +35,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 
 		# self.frame_rate = 60.0
 
-		# self.server = DynamicReconfigureServer(ConfigType, self.reconfigureParams)
-
-
-
+		self.server = DynamicReconfigureServer(ConfigType, self.reconfigureParams)
 		self.is_trial_on = False
 		self.period = rospy.Duration(1.0/self.frame_rate)
 		self.lock = threading.Lock()
@@ -50,7 +47,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		self.goal_threshold = 10
 
 		self.signal_sparsity = 0.0
-		self.random_direction = 0.9
+		self.random_direction = 0.8
 		self.rand_vec_scale = 1.0
 		self.mu = [0]*self.dim
 		self.cov = np.eye(self.dim)
@@ -121,7 +118,7 @@ class PointRobotAutonomyControl(RosProcessingComm):
 		rospy.loginfo("END OF CONSTRUCTOR - point_robot_autonomy_control_node")
 
 
-	def reconfigureParams(self, level, config):
+	def reconfigureParams(self, config, level):
 		print "IN CONFIG"
 		self.signal_sparsity = config["signal_sparsity"]
 		self.random_direction = config["random_direction"]

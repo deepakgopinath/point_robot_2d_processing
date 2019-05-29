@@ -15,4 +15,7 @@
 	<node pkg="robot_control" output="screen" type="point_robot_autonomy_control.py" name="point_robot_autonomy_control" respawn="false"/>
 	<node pkg="robot_control" output="screen" type="process_key_strokes.py" name="process_key_strokes" respawn="false"/>
 
+	<node pkg="rqt_reconfigure" name="rqt_reconfigure" type="rqt_reconfigure" />
+	
+
 </launch>

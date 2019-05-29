@@ -40,7 +40,7 @@ class PointRobotHumanControl(RosProcessingComm):
 		self.human_control_pub = None
 		self.human_robot_pose_pub = None
 		self.initializePublishers()
-		
+
 		self.dim = dim
 		self.num_goals = 2
 		assert(self.num_goals > 0)
@@ -49,7 +49,7 @@ class PointRobotHumanControl(RosProcessingComm):
 		if rospy.has_param('max_cart_vel'):
 			self._max_cart_vel = np.array(rospy.get_param('max_cart_vel'))
 		else:
-			self._max_cart_vel = np.ones(self.dim)
+			self._max_cart_vel = 0.25*np.ones(self.dim)
 			rospy.logwarn('No rosparam for max_cart_vel found...Defaulting to max linear velocity of 50 cm/s and max rotational velocity of 50 degrees/s')
 
 		if rospy.has_param('width'):
@@ -72,7 +72,7 @@ class PointRobotHumanControl(RosProcessingComm):
 		self.user_vel.header.stamp = rospy.Time.now()
 		self.user_vel.header.frame_id = 'human_control'
 
-		self.human_robot_pose = np.zeros(self.dim) #UNUSED for the time being. 
+		self.human_robot_pose = np.zeros(self.dim) #UNUSED for the time being.
 		self.human_robot_pose_msg = Point()
 		self.getRobotPosition()
 
