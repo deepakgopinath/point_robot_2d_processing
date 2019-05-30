@@ -78,7 +78,11 @@ void setUpDicts()
 {
   goal_color.set("Triangle", "r");
   goal_color.set("Square", "g");
+  goal_color.set("Circle", "b");
+  goal_color.set("Rectangle", "o");
 
   goal_shapes.put(0, "Triangle");
   goal_shapes.put(1, "Square");
+  goal_shapes.put(2, "Circle");
+  goal_shapes.put(3, "Rectangle");
 }

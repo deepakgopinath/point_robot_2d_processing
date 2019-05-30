@@ -2,7 +2,7 @@
 void sendRobotPoses()
 {
   if (isARInitialized && isHRInitialized)
-  {
+  { //Send messages
     a_r_pos = a_r.getPosition();
     String a_r_pos_message = "A_R_POSE," + str(a_r_pos.x) + "," + str(a_r_pos.y);
     sendUDP(a_r_pos_message, A_DEST_IP, A_DEST_PORT, a_udp);

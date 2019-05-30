@@ -12,6 +12,8 @@ void receive(byte[] data, String ip, int port)
 
 void processMessage(String message, String ip, int port)
 {
+  
+  //Process receiving UDP messages
   String[] message_list = split(message, ",");
   //CONTROL COMMAND FOR HUMAN CONTROLLED ROBOT
   if (message_list[0].equals("H_COMMAND"))

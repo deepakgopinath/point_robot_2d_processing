@@ -17,6 +17,9 @@ class SetGoalsRobot(RosProcessingComm):
 		RosProcessingComm.__init__(self, udp_ip=udp_ip, udp_recv_port=udp_recv_port, udp_send_port=udp_send_port)
 		self.dim = dim
 		self.num_goals = num_goals
+		self.max_num_goals = 5
+
+
 		self.autonomy_goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
 		self.autonomy_robot_position = npa([0]*self.dim, dtype='f')
 
@@ -36,11 +39,13 @@ class SetGoalsRobot(RosProcessingComm):
 			self.width = rospy.get_param('width')
 		else:
 			self.width = 1200
+		self.x_offset = 20
 
 		if rospy.has_param('height'):
 			self.height = rospy.get_param('height')
 		else:
 			self.height = 900
+		self.y_offset = 20
 
 		self.init_autonomy_goal_positions()
 		self.init_autonomy_robot_position()
@@ -58,6 +63,7 @@ class SetGoalsRobot(RosProcessingComm):
 		rospy.Service("setgoalsrobot/send_human_robot_pose_to_processing", Trigger, self.send_human_robot_pose_to_processing)
 		rospy.Service("setgoalsrobot/reset_autonomy_goals", Trigger, self.reset_autonomy_goals)
 		rospy.Service("setgoalsrobot/reset_human_goals", Trigger, self.reset_human_goals)
+		rospy.Service("setgoalsrobot/reset_num_goals", Trigger, self.reset_num_goals)
 
 		rospy.loginfo("END OF CONSTRUCTOR - set_goals_robot_node")
 
@@ -107,6 +113,9 @@ class SetGoalsRobot(RosProcessingComm):
 		status.success = True
 		return status
 
+	#Reset robot poses.
+
+	#Reset goals
 	def reset_autonomy_goals(self, req):
 		status = TriggerResponse()
 		self.createNewAutonomyGoalPositions()
@@ -119,21 +128,26 @@ class SetGoalsRobot(RosProcessingComm):
 		status.success = True
 		return status
 
+	def reset_num_goals(self, req):
+		status = TriggerResponse()
+		self.num_goals = np.random.choice(range(2, self.max_num_goals))
+		self.autonomy_goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+		self.human_goal_positions = npa([[0]*self.dim]*self.num_goals, dtype= 'f')
+		status.success = True
+		return status
+
+
 	def createNewAutonomyGoalPositions(self):
-		if self.num_goals == 2:
-			self.autonomy_goal_positions[0][0] = 0.0 + np.random.random()*self.width/2.0
-			self.autonomy_goal_positions[0][1] = 0.0 + np.random.random()*self.height
-			self.autonomy_goal_positions[1][0] = 0.0 + np.random.random()*self.width/2.0
-			self.autonomy_goal_positions[1][1] = 0.0 + np.random.random()*self.height
+		for i in range(self.num_goals):
+			self.autonomy_goal_positions[i] = [self.x_offset + np.random.random()*(self.width/2.0 - 2*self.x_offset),  self.y_offset + np.random.random()*(self.height - 2*self.y_offset)]
+
 
 	def createNewHumanGoalPositions(self):
-		if self.num_goals == 2:
-			self.human_goal_positions[0][0] = 0.0 + np.random.random()*self.width/2.0 + self.width/2.0
-			self.human_goal_positions[0][1] = 0.0 + np.random.random()*self.height
-			self.human_goal_positions[1][0] = 0.0 + np.random.random()*self.width/2.0 + self.width/2.0
-			self.human_goal_positions[1][1] = 0.0 + np.random.random()*self.height
+		for i in range(self.num_goals):
+			self.human_goal_positions[i] = [self.x_offset + np.random.random()*(self.width/2.0 - 2*self.x_offset) + self.width/2.0, self.y_offset + np.random.random()*(self.height - 2*self.y_offset)]
 
 
+	#Init functions
 	def init_autonomy_robot_position(self):
 		self.autonomy_robot_position[0] = self.width/4.0
 		self.autonomy_robot_position[1] = self.height/2.0
@@ -157,6 +171,7 @@ class SetGoalsRobot(RosProcessingComm):
 			self.human_goal_positions[1][1] = self.height/4.0
 
 	def createMsgString(self, msg_type):
+		#all of the following are outgoing messages to processing
 		if msg_type == 'autonomy_goal_pose':
 			msg_string = "AUTONOMY_GOALPOS"
 			msg_string += ","+str(self.num_goals)

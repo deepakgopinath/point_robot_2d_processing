@@ -22,7 +22,11 @@ class Goal
     } else if (colorType == "b")
     {
       col = color(0, 0, 255);
+    } else if (colorType == "o")
+    {
+      col = color(255,165,0);
     }
+    
   }
 
   void display()
@@ -37,6 +41,16 @@ class Goal
     {
       rectMode(RADIUS);
       square(position.x, position.y, radius);
+    }
+    if (shape.equals("Circle"))
+    {
+      ellipseMode(RADIUS);
+      ellipse(position.x, position.y, radius, radius);
+    }
+    if (shape.equals("Rectangle"))
+    {
+      rectMode(RADIUS);
+      rect(position.x, position.y, 1.2*radius, radius);
     }
   }
 

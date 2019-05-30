@@ -147,7 +147,7 @@ class PointRobotHumanControl(RosProcessingComm):
 
 	def createMessageString(self, uv):
 		msg_str = "H_COMMAND"
-		for i in range(self.dim):
+		for i in range(self.dim): #outgoing message to processing
 			msg_str += ","
 			msg_str += str(uv.velocity.data[i])
 
@@ -167,7 +167,7 @@ class PointRobotHumanControl(RosProcessingComm):
 		msg_str = self.recvStrFromProcessing()
 		if msg_str != "none":
 			msg_str = msg_str.split(',')
-			if msg_str[0] == "H_R_POSE":
+			if msg_str[0] == "H_R_POSE": #incoming message from processing
 				self.human_robot_pose_msg.x = float(msg_str[1])
 				self.human_robot_pose_msg.y = float(msg_str[2])
 

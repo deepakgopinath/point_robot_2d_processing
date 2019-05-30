@@ -36,8 +36,9 @@ class ProcessKeyStrokes(RosProcessingComm):
         self.send_human_robot_pose_to_processing_service = rospy.ServiceProxy('/setgoalsrobot/send_human_robot_pose_to_processing', Trigger)
         self.reset_autonomy_goals = rospy.ServiceProxy('/setgoalsrobot/reset_autonomy_goals', Trigger)
         self.reset_human_goals = rospy.ServiceProxy('/setgoalsrobot/reset_human_goals', Trigger)
+        self.reset_num_goals = rospy.ServiceProxy('/setgoalsrobot/reset_num_goals', Trigger)
         self.autonomy_node_trigger_trial = rospy.ServiceProxy('/point_robot_autonomy_control/trigger_trial', SetBool)
-        
+
         rospy.loginfo("END OF CONSTRUCTOR - process_key_strokes_node")
 
     def step(self):
@@ -49,10 +50,14 @@ class ProcessKeyStrokes(RosProcessingComm):
                 self.send_autonomy_goals_to_processing_service()
                 self.send_human_goals_to_processing_service()
             elif msg_str[0] == 'GOALS_RESET':
+                #reset all goals.
+                self.reset_num_goals()
                 self.reset_autonomy_goals()
                 self.reset_human_goals()
                 self.send_autonomy_goals_to_processing_service()
                 self.send_human_goals_to_processing_service()
+
+                #reset autonomy and human robot pose. 
             elif msg_str[0] == 'BEGIN_TRIAL':
                 trigger_msg = SetBoolRequest()
                 trigger_msg.data = True
