@@ -41,7 +41,20 @@ class ProcessKeyStrokes(RosProcessingComm):
         self.reset_human_robot = rospy.ServiceProxy('/setgoalsrobot/reset_human_robot', Trigger)
         self.autonomy_node_trigger_trial = rospy.ServiceProxy('/point_robot_autonomy_control/trigger_trial', SetBool)
 
+        self.begin_trial_pub = None
+        self.end_trial_pub = None
+        self.goals_reset_pub = None
+        self.session_init_pub = None
+        self.initializePublishers()
+
         rospy.loginfo("END OF CONSTRUCTOR - process_key_strokes_node")
+
+
+    def initializePublishers(self):
+        self.begin_trial_pub = rospy.Publisher('begin_trial', String, queue_size=1)
+        self.end_trial_pub = rospy.Publisher('end_trial', String, queue_size=1)
+        self.goals_reset_pub = rospy.Publisher('goals_reset', String, queue_size=1)
+        self.session_init_pub = rospy.Publisher('session_init', String, queue_size=1)
 
     def step(self):
         msg_str = self.recvStrFromProcessing()
@@ -52,6 +65,8 @@ class ProcessKeyStrokes(RosProcessingComm):
                 self.send_autonomy_goals_to_processing_service()
                 self.send_human_goals_to_processing_service()
             elif msg_str[0] == 'GOALS_RESET':
+                msg = String("goals_reset")
+                self.goals_reset_pub.pub(msg)
                 #reset all goals.
                 self.reset_num_goals()
                 self.reset_autonomy_goals()
@@ -64,16 +79,27 @@ class ProcessKeyStrokes(RosProcessingComm):
                 self.reset_human_robot()
                 self.send_autonomy_robot_pose_to_processing_service()
                 self.send_human_robot_pose_to_processing_service()
-                
+
             elif msg_str[0] == 'BEGIN_TRIAL':
+                msg = String("begin_trial")
+                self.begin_trial_pub.pub(msg)
+
                 trigger_msg = SetBoolRequest()
                 trigger_msg.data = True
                 self.autonomy_node_trigger_trial(trigger_msg)
+
             elif msg_str[0] == 'END_TRIAL':
                 trigger_msg = SetBoolRequest()
                 trigger_msg.data = False
                 self.autonomy_node_trigger_trial(trigger_msg)
+
+                msg = String("end_trial")
+                self.end_trial_pub.pub(msg)
+
             elif msg_str[0] == 'ROBOT_READY':
+                msg = String("session_init")
+                self.session_init_pub.pub(msg)
+
                 self.send_autonomy_robot_pose_to_processing_service()
                 self.send_human_robot_pose_to_processing_service()
 
