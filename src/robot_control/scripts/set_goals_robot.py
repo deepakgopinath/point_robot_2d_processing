@@ -64,6 +64,8 @@ class SetGoalsRobot(RosProcessingComm):
 		rospy.Service("setgoalsrobot/reset_autonomy_goals", Trigger, self.reset_autonomy_goals)
 		rospy.Service("setgoalsrobot/reset_human_goals", Trigger, self.reset_human_goals)
 		rospy.Service("setgoalsrobot/reset_num_goals", Trigger, self.reset_num_goals)
+		rospy.Service("setgoalsrobot/reset_human_robot", Trigger, self.reset_human_robot)
+		rospy.Service("setgoalsrobot/reset_autonomy_robot", Trigger, self.reset_autonomy_robot)
 
 		rospy.loginfo("END OF CONSTRUCTOR - set_goals_robot_node")
 
@@ -114,6 +116,17 @@ class SetGoalsRobot(RosProcessingComm):
 		return status
 
 	#Reset robot poses.
+	def reset_autonomy_robot(self, req):
+		status = TriggerResponse()
+		self.createNewAutonomyRobotPosition()
+		status.success = True
+		return status
+
+	def reset_human_robot(self, req):
+		status = TriggerResponse()
+		self.createNewHumanRobotPosition()
+		status.success = True
+		return status
 
 	#Reset goals
 	def reset_autonomy_goals(self, req):
@@ -136,16 +149,20 @@ class SetGoalsRobot(RosProcessingComm):
 		status.success = True
 		return status
 
+	def createNewAutonomyRobotPosition(self):
+		self.autonomy_robot_position = [3*self.x_offset + np.random.random()*(self.width/2.0 - 6*self.x_offset),  3*self.y_offset + np.random.random()*(self.height - 6*self.y_offset)]
+
+	def createNewHumanRobotPosition(self):
+		self.human_robot_position = [3*self.x_offset + np.random.random()*(self.width/2.0 - 6*self.x_offset),  3*self.y_offset + np.random.random()*(self.height - 6*self.y_offset)]
+
 
 	def createNewAutonomyGoalPositions(self):
 		for i in range(self.num_goals):
 			self.autonomy_goal_positions[i] = [self.x_offset + np.random.random()*(self.width/2.0 - 2*self.x_offset),  self.y_offset + np.random.random()*(self.height - 2*self.y_offset)]
 
-
 	def createNewHumanGoalPositions(self):
 		for i in range(self.num_goals):
 			self.human_goal_positions[i] = [self.x_offset + np.random.random()*(self.width/2.0 - 2*self.x_offset) + self.width/2.0, self.y_offset + np.random.random()*(self.height - 2*self.y_offset)]
-
 
 	#Init functions
 	def init_autonomy_robot_position(self):
