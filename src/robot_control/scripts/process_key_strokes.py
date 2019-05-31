@@ -3,6 +3,7 @@ import rospy
 from ros_processing_bridge.ros_processing_bridge import RosProcessingComm
 from std_srvs.srv import Trigger, TriggerRequest, TriggerResponse
 from std_srvs.srv import SetBool, SetBoolRequest, SetBoolResponse
+from std_msgs.msg import String
 import threading
 
 class ProcessKeyStrokes(RosProcessingComm):
@@ -66,7 +67,7 @@ class ProcessKeyStrokes(RosProcessingComm):
                 self.send_human_goals_to_processing_service()
             elif msg_str[0] == 'GOALS_RESET':
                 msg = String("goals_reset")
-                self.goals_reset_pub.pub(msg)
+                self.goals_reset_pub.publish(msg)
                 #reset all goals.
                 self.reset_num_goals()
                 self.reset_autonomy_goals()
@@ -82,7 +83,7 @@ class ProcessKeyStrokes(RosProcessingComm):
 
             elif msg_str[0] == 'BEGIN_TRIAL':
                 msg = String("begin_trial")
-                self.begin_trial_pub.pub(msg)
+                self.begin_trial_pub.publish(msg)
 
                 trigger_msg = SetBoolRequest()
                 trigger_msg.data = True
@@ -94,11 +95,11 @@ class ProcessKeyStrokes(RosProcessingComm):
                 self.autonomy_node_trigger_trial(trigger_msg)
 
                 msg = String("end_trial")
-                self.end_trial_pub.pub(msg)
+                self.end_trial_pub.publish(msg)
 
             elif msg_str[0] == 'ROBOT_READY':
                 msg = String("session_init")
-                self.session_init_pub.pub(msg)
+                self.session_init_pub.publish(msg)
 
                 self.send_autonomy_robot_pose_to_processing_service()
                 self.send_human_robot_pose_to_processing_service()
